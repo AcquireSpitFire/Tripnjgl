@@ -1,49 +1,42 @@
-const slides = [
-  {
-    type: "image",
-    src: "../data/image/000571250029.jpg",
-    alt: "Landschaft"
-  },
-  {
-    type: "image",
-    src: "../data/image/000571250031.jpg",
-    alt: "Stadtansicht"
-  },
-  {
-    type: "video",
-    src: "../data/video/PXL_20250109_214858313.TS.mp4"
-  }
-];
-
-
+// Die Slides werden aus data/ausstellungen/index.json geladen:
+// jede Ausstellung ist ein Slide mit ihrem Deckblatt.
+let slides = [];
 
 let currentSlide = 0;
 let timer;
 
 const slideContent = document.getElementById("slide_content");
-//const dotsContainer = document.getElementById("dots");
+const dotsContainer = document.getElementById("dots");
 
 function showSlide(index) {
+  clearTimeout(timer);
   currentSlide = (index + slides.length) % slides.length;
 
-  const slide = slides[currentSlide];
+  const ausstellung = slides[currentSlide];
+  const deckblatt = ausstellung.deckblatt;
+  const link = "ausstellung.html?id=" + encodeURIComponent(ausstellung.id);
 
   slideContent.innerHTML = "";
 
-  if (slide.type === "image") {
+  if (deckblatt.type === "image") {
+    // Das ganze Bild ist ein Link zur Ausstellung
+    const anchor = document.createElement("a");
+    anchor.href = link;
+
     const image = document.createElement("img");
 
-    image.src = slide.src;
-    image.alt = slide.alt || "";
+    image.src = deckblatt.src;
+    image.alt = deckblatt.alt || ausstellung.titel;
 
-    slideContent.appendChild(image);
+    anchor.appendChild(image);
+    slideContent.appendChild(anchor);
     startTimer(5000);
   }
 
-  if (slide.type === "video") {
+  if (deckblatt.type === "video") {
     const video = document.createElement("video");
 
-    video.src = slide.src;
+    video.src = deckblatt.src;
     video.controls = true;
     video.autoplay = true;
     video.muted = true;
@@ -54,6 +47,14 @@ function showSlide(index) {
     // Nach dem Ende des Videos zum nächsten Slide wechseln
     video.addEventListener("ended", nextSlide);
   }
+
+  // Titel als Link unter jedem Slide (bei Videos der einzige Link,
+  // weil die Video-Steuerung Klicks auf das Video selbst abfängt)
+  const titleLink = document.createElement("a");
+  titleLink.href = link;
+  titleLink.className = "slide_link";
+  titleLink.textContent = ausstellung.titel + " – zur Ausstellung ›";
+  slideContent.appendChild(titleLink);
 
   updateDots();
 }
@@ -92,7 +93,30 @@ function updateDots() {
   });
 }
 
-document.getElementById("next").addEventListener("click", nextSlide);
-document.getElementById("prev").addEventListener("click", previousSlide);
+async function loadSlides() {
+  try {
+    const response = await fetch("data/ausstellungen/index.json");
 
-showSlide(0);
+    if (!response.ok) {
+      throw new Error("HTTP " + response.status);
+    }
+
+    slides = await response.json();
+  } catch (error) {
+    slideContent.textContent = "Ausstellungen konnten nicht geladen werden.";
+    console.error(error);
+    return;
+  }
+
+  if (slides.length === 0) {
+    slideContent.textContent = "Noch keine Ausstellungen vorhanden.";
+    return;
+  }
+
+  document.getElementById("next").addEventListener("click", nextSlide);
+  document.getElementById("prev").addEventListener("click", previousSlide);
+
+  showSlide(0);
+}
+
+loadSlides();
