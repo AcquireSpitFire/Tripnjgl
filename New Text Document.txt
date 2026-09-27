@@ -1,0 +1,6 @@
+Tripnjungle Toms WebGallery
+
+Verschieden Ordner welche, verschieden ausstellungen zeigen
+
+Eine ausstellungen hat ein Theme, Bilder / videos, Überschrift, Beschreibung + "Deckblatt" mit Foto oder videos
+Jedes Foto hat eine id, 
