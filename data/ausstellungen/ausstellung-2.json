@@ -4,8 +4,8 @@
   "theme": "Theme der Ausstellung",
   "beschreibung": "Beschreibung der Ausstellung.",
   "deckblatt": {
-    "type": "video",
-    "src": "data/video/PXL_20250109_214858313.TS.mp4"
+    "type": "image",
+    "src": "data/image/000578040028.jpg"
   },
   "medien": [
     { "id": "ausstellung-2-1", "type": "image", "src": "data/image/000578040028.jpg", "alt": "" },
