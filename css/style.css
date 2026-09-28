@@ -1,0 +1,170 @@
+/* Tripnjungle – minimales Design, schwarzer Hintergrund */
+
+:root {
+  --bg: #000;
+  --text: #e6e6e6;
+  --muted: #777;
+  --frame: #0d0d0d;          /* Rahmen hinter den Medien, kaum sichtbar */
+  --media-ratio: 3 / 2;      /* Einheitliches Format für alle Bilder/Videos */
+  --gap: 1rem;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  padding: 2rem clamp(1rem, 4vw, 3rem);
+  background: var(--bg);
+  color: var(--text);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+main {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+header {
+  max-width: 1200px;
+  margin: 0 auto 2rem;
+}
+
+h1 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 400;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+p {
+  margin: 0 0 1.5rem;
+  color: var(--muted);
+}
+
+a {
+  color: var(--muted);
+  text-decoration: none;
+  transition: color 0.2s;
+}
+
+a:hover,
+a:focus-visible {
+  color: var(--text);
+}
+
+/* Alle Medien: gleiche Größe, nichts wird abgeschnitten */
+img,
+video {
+  display: block;
+  width: 100%;
+  aspect-ratio: var(--media-ratio);
+  object-fit: contain;
+  background: var(--frame);
+}
+
+/* ---------- Slideshow (index.html) ---------- */
+
+.slideshow {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--gap);
+}
+
+.slide_content {
+  min-width: 0;
+}
+
+.slide_link {
+  display: block;
+  margin-top: 0.75rem;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+}
+
+.nav {
+  padding: 0.5rem;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 2rem;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.nav:hover,
+.nav:focus-visible {
+  color: var(--text);
+}
+
+#dots {
+  grid-column: 1 / -1;
+  display: flex;
+  justify-content: center;
+  gap: 0.6rem;
+}
+
+.dot {
+  width: 6px;
+  height: 6px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: #333;
+  cursor: pointer;
+}
+
+.dot.active {
+  background: var(--text);
+}
+
+/* ---------- Ausstellung (ausstellung.html) ---------- */
+
+header > a {
+  display: inline-block;
+  margin-bottom: 1.5rem;
+  font-size: 0.85rem;
+}
+
+#theme {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+}
+
+#front_page {
+  margin-bottom: 2rem;
+}
+
+#description {
+  max-width: 60ch;
+  margin-bottom: 3rem;
+}
+
+.galerie {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: var(--gap);
+}
+
+/* Schmale Bildschirme: Pfeile kleiner */
+@media (max-width: 600px) {
+  .nav {
+    font-size: 1.5rem;
+    padding: 0.25rem;
+  }
+
+  .galerie {
+    grid-template-columns: 1fr;
+  }
+}
