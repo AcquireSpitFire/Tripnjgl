@@ -1,0 +1,19 @@
+[
+  {
+    "id": "ausstellung-1",
+    "titel": "Ausstellung 1",
+    "deckblatt": {
+      "type": "image",
+      "src": "data/image/000571250029.jpg",
+      "alt": "Landschaft"
+    }
+  },
+  {
+    "id": "ausstellung-2",
+    "titel": "Ausstellung 2",
+    "deckblatt": {
+      "type": "image",
+      "src": "data/image/000578040028.jpg"
+    }
+  }
+]
