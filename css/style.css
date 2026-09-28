@@ -142,11 +142,11 @@ header > a {
   letter-spacing: 0.1em;
 }
 
-#deckblatt {
+#front_page {
   margin-bottom: 2rem;
 }
 
-#beschreibung {
+#description {
   max-width: 60ch;
   margin-bottom: 3rem;
 }

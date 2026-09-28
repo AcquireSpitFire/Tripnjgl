@@ -1,0 +1,19 @@
+[
+  {
+    "id": "exhibition-1",
+    "titel": "Exhibition 1",
+    "front_page": {
+      "type": "image",
+      "src": "data/image/000571250029.jpg",
+      "alt": "Landschaft"
+    }
+  },
+  {
+    "id": "exhibition-2",
+    "titel": "Exhibition 2",
+    "front_page": {
+      "type": "image",
+      "src": "data/image/000578040028.jpg"
+    }
+  }
+]
