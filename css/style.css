@@ -15,6 +15,7 @@
 
 html {
   color-scheme: dark;
+  overflow-x: clip;          /* verhindert seitliches Scrollen durch die Klickflächen der Pfeile */
 }
 
 body {
@@ -75,7 +76,10 @@ video {
 
 .slideshow {
   display: grid;
-  grid-template-columns: auto 1fr auto;
+  /* Mittlere Spalte (Medium) höchstens so breit, dass das 3:2-Bild samt Rest
+     auf den Bildschirm passt: 16rem = Platz für Header, Text, Link und Punkte */
+  grid-template-columns: auto minmax(0, calc((100dvh - 16rem) * 3 / 2)) auto;
+  justify-content: center;
   align-items: center;
   gap: var(--gap);
 }
@@ -104,11 +108,23 @@ video {
   transition: color 0.2s;
 }
 
-/* Unsichtbare Erweiterung der Klickfläche zur Seite, ohne das Layout zu verschieben */
+/* Unsichtbare Erweiterung der Klickfläche: vom Rand des Mediums bis zum
+   Seitenrand, ohne das Layout zu verschieben */
 .nav::before {
   content: "";
   position: absolute;
-  inset: 0 -1rem;
+  top: 0;
+  bottom: 0;
+}
+
+.prev::before {
+  left: -100vw;                     /* bis weit über den linken Seitenrand */
+  right: calc(-1 * var(--gap));     /* bis an den Rand des Mediums */
+}
+
+.next::before {
+  left: calc(-1 * var(--gap));      /* ab dem Rand des Mediums */
+  right: -100vw;                    /* bis weit über den rechten Seitenrand */
 }
 
 .nav:hover,
