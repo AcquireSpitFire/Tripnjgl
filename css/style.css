@@ -92,6 +92,8 @@ video {
 }
 
 .nav {
+  position: relative;
+  align-self: stretch;       /* Klickfläche über die ganze Bildhöhe */
   padding: 0.5rem;
   border: 0;
   background: none;
@@ -100,6 +102,13 @@ video {
   line-height: 1;
   cursor: pointer;
   transition: color 0.2s;
+}
+
+/* Unsichtbare Erweiterung der Klickfläche zur Seite, ohne das Layout zu verschieben */
+.nav::before {
+  content: "";
+  position: absolute;
+  inset: 0 -1rem;
 }
 
 .nav:hover,

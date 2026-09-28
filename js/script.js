@@ -1,4 +1,4 @@
-// Die Slides werden aus data/ausstellungen/index.json geladen:
+// Die Slides werden aus data/exhibitions/index.json geladen:
 // jede Ausstellung ist ein Slide mit ihrem Deckblatt.
 let slides = [];
 
@@ -13,8 +13,8 @@ function showSlide(index) {
   currentSlide = (index + slides.length) % slides.length;
 
   const ausstellung = slides[currentSlide];
-  const deckblatt = ausstellung.deckblatt;
-  const link = "ausstellung.html?id=" + encodeURIComponent(ausstellung.id);
+  const deckblatt = ausstellung.front_page;
+  const link = "exhibition.html?id=" + encodeURIComponent(ausstellung.id);
 
   slideContent.innerHTML = "";
 
@@ -95,7 +95,7 @@ function updateDots() {
 
 async function loadSlides() {
   try {
-    const response = await fetch("data/ausstellungen/index.json");
+    const response = await fetch("data/exhibitions/index.json");
 
     if (!response.ok) {
       throw new Error("HTTP " + response.status);
