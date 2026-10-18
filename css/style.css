@@ -7,6 +7,10 @@
   --frame: #0d0d0d;          /* Rahmen hinter den Medien, kaum sichtbar */
   --media-ratio: 3 / 2;      /* Einheitliches Format für alle Bilder/Videos */
   --gap: 1rem;
+  /* Maximale Breite der großen Medien (Slideshow und Deckblatt der Ausstellung):
+     so breit, dass das 3:2-Bild samt Rest auf den Bildschirm passt.
+     16rem = Platz für Header, Text, Link und Punkte */
+  --media-max-width: calc((100dvh - 16rem) * 3 / 2);
 }
 
 * {
@@ -76,9 +80,7 @@ video {
 
 .slideshow {
   display: grid;
-  /* Mittlere Spalte (Medium) höchstens so breit, dass das 3:2-Bild samt Rest
-     auf den Bildschirm passt: 16rem = Platz für Header, Text, Link und Punkte */
-  grid-template-columns: auto minmax(0, calc((100dvh - 16rem) * 3 / 2)) auto;
+  grid-template-columns: auto minmax(0, var(--media-max-width)) auto;
   justify-content: center;
   align-items: center;
   gap: var(--gap);
@@ -168,7 +170,8 @@ header > a {
 }
 
 #front_page {
-  margin-bottom: 2rem;
+  max-width: var(--media-max-width);   /* gleiche Größe wie in der Slideshow */
+  margin: 0 auto 2rem;                 /* mittig, wie in der Slideshow */
 }
 
 #description {
