@@ -7,7 +7,7 @@
      3. Seitenaufbau      (Header, Inhalt)
      4. Medien            (Bilder, Videos)
      5. Startseite        (index.html – Slideshow)
-     6. Ausstellung       (exhibition.html – Galerie)
+     6. Ausstellung       (exhibition.html – Slideshow + Galerie-Band)
      7. Handy             (schmale Bildschirme)
      8. Handy hochkant
      9. Handy quer        (niedrige Bildschirme)
@@ -270,8 +270,26 @@ header > a {
   letter-spacing: 0.1em;
 }
 
-#front_page {
+/* Slideshow oben (Deckblatt + alle Bilder). Gleicher Aufbau wie auf der
+   Startseite, aber so groß, dass sie samt Header auf den ersten
+   Bildschirm passt (13rem = Platz für Link, Titel, Thema und Punkte).
+   100vh ist der Rückfall für Browser ohne dvh. */
+.exhibition_slideshow {
+  --show-width: calc((100vh - 13rem) * 3 / 2);
+  --show-width: calc((100dvh - 13rem) * 3 / 2);
+  grid-template-columns: auto minmax(0, var(--show-width)) auto;
+  justify-content: center;
   margin-bottom: 2rem;
+}
+
+/* Nur ein Bild: keine Pfeile, keine Punkte */
+.exhibition_slideshow.single .nav,
+.exhibition_slideshow.single #dots {
+  visibility: hidden;
+}
+
+[hidden] {
+  display: none !important;
 }
 
 #description {
@@ -279,10 +297,22 @@ header > a {
   margin-bottom: 3rem;
 }
 
+/* Galerie als Band: alle Bilder nebeneinander, das Band scrollt seitlich
+   (die Seite selbst nicht). Beim Scrollen rastet jedes Bild ein. */
 .galerie {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(min(280px, 100%), 1fr));
+  display: flex;
   gap: var(--gap);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;   /* am Ende des Bandes nicht „zurück“ blättern */
+  scroll-snap-type: x mandatory;
+  padding-bottom: 0.75rem;          /* Platz für die Scrollleiste */
+  scrollbar-color: #333 transparent;
+}
+
+.galerie > * {
+  flex: none;
+  width: min(480px, 80%);
+  scroll-snap-align: start;
 }
 
 
@@ -305,9 +335,17 @@ header > a {
     right: calc(-1 * var(--page-pad));
   }
 
-  /* Galerie einspaltig */
+  /* Galerie: alle Bilder untereinander zum Runterscrollen (statt Band) */
   .galerie {
+    display: grid;
     grid-template-columns: 1fr;
+    overflow-x: visible;
+    scroll-snap-type: none;
+    padding-bottom: 0;
+  }
+
+  .galerie > * {
+    width: 100%;
   }
 }
 
