@@ -164,6 +164,72 @@ function setupGalerie(exhibition) {
   );
 }
 
+// ---------- Vollbild ----------
+// Klick auf ein Bild (Slideshow oder Galerie) zeigt es bildschirmfüllend.
+// Schließen: Klick irgendwo, Esc-Taste oder ×.
+// Videos haben ihren eigenen Vollbild-Knopf in der Video-Steuerung.
+
+const viewerElement = document.getElementById("viewer");
+const viewerImage = document.getElementById("viewer_image");
+
+function openViewer(image) {
+  clearTimeout(timer);   // Slideshow anhalten, solange das Bild offen ist
+
+  viewerImage.src = image.src;
+  viewerImage.alt = image.alt;
+  viewerElement.hidden = false;
+  document.documentElement.classList.add("viewer_open");
+
+  // Echter Vollbildmodus, wo der Browser ihn erlaubt (am iPhone nicht –
+  // dort füllt die Ansicht trotzdem den ganzen Bildschirm)
+  if (viewerElement.requestFullscreen) {
+    viewerElement.requestFullscreen().catch(() => {});
+  }
+}
+
+function closeViewer() {
+  if (viewerElement.hidden) {
+    return;
+  }
+
+  viewerElement.hidden = true;
+  document.documentElement.classList.remove("viewer_open");
+
+  if (document.fullscreenElement) {
+    document.exitFullscreen().catch(() => {});
+  }
+
+  // Slideshow weiterlaufen lassen, wenn gerade ein Bild gezeigt wird
+  if (slides[currentSlide] && slides[currentSlide].type !== "video") {
+    startTimer(5000);
+  }
+}
+
+function setupViewer() {
+  [slideContent, galerieElement].forEach((container) => {
+    container.addEventListener("click", (event) => {
+      if (event.target.tagName === "IMG") {
+        openViewer(event.target);
+      }
+    });
+  });
+
+  viewerElement.addEventListener("click", closeViewer);
+
+  document.addEventListener("keydown", (event) => {
+    if (event.key === "Escape") {
+      closeViewer();
+    }
+  });
+
+  // Esc im echten Vollbildmodus beendet ihn, ohne ein keydown auszulösen
+  document.addEventListener("fullscreenchange", () => {
+    if (!document.fullscreenElement) {
+      closeViewer();
+    }
+  });
+}
+
 // ---------- Laden ----------
 
 function showError(message) {
@@ -181,6 +247,7 @@ function showExhibition(exhibition) {
 
   setupSlideshow(exhibition);
   setupGalerie(exhibition);
+  setupViewer();
 }
 
 async function loadExhibition() {

@@ -315,6 +315,58 @@ main {
   scroll-snap-align: start;
 }
 
+/* Vollbild-Ansicht: Klick auf ein Bild zeigt es bildschirmfüllend */
+
+.exhibition_slideshow img,
+.galerie img {
+  cursor: zoom-in;
+}
+
+.viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  cursor: zoom-out;
+}
+
+.viewer img {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  object-fit: contain;      /* ganzes Bild, nichts abgeschnitten */
+  background: none;
+}
+
+.viewer_close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.75rem;
+  z-index: 1;
+  padding: 0.25rem 0.5rem;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 2rem;
+  line-height: 1;
+  text-shadow: 0 0 6px #000;   /* auch auf hellen Bildern sichtbar */
+  cursor: pointer;
+}
+
+.viewer_close:hover,
+.viewer_close:focus-visible {
+  color: var(--text);
+}
+
+/* Seite dahinter nicht scrollen, solange das Bild offen ist */
+.viewer_open,
+.viewer_open body {
+  overflow: hidden;
+}
+
 
 /* ---------- 7. Handy (schmale Bildschirme) ---------- */
 
