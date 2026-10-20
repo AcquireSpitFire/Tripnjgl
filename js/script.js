@@ -1,4 +1,4 @@
-// Die Slides werden aus data/exhibitions/index.json geladen:
+// Die Slides werden aus data/ausstellungen/index.json geladen:
 // jede Ausstellung ist ein Slide mit ihrem Deckblatt.
 let slides = [];
 
@@ -12,31 +12,31 @@ function showSlide(index) {
   clearTimeout(timer);
   currentSlide = (index + slides.length) % slides.length;
 
-  const ausstellung = slides[currentSlide];
-  const deckblatt = ausstellung.front_page;
-  const link = "exhibition.html?id=" + encodeURIComponent(ausstellung.id);
+  const exhibition = slides[currentSlide];
+  const front_page = exhibition.front_page;
+  const link = "exhibition.html?id=" + encodeURIComponent(exhibition.id);
 
   slideContent.innerHTML = "";
 
-  if (deckblatt.type === "image") {
+  if (front_page.type === "image") {
     // Das ganze Bild ist ein Link zur Ausstellung
     const anchor = document.createElement("a");
     anchor.href = link;
 
     const image = document.createElement("img");
 
-    image.src = deckblatt.src;
-    image.alt = deckblatt.alt || ausstellung.titel;
+    image.src = front_page.src;
+    image.alt = front_page.alt || exhibition.titel;
 
     anchor.appendChild(image);
     slideContent.appendChild(anchor);
     startTimer(5000);
   }
 
-  if (deckblatt.type === "video") {
+  if (front_page.type === "video") {
     const video = document.createElement("video");
 
-    video.src = deckblatt.src;
+    video.src = front_page.src;
     video.controls = true;
     video.autoplay = true;
     video.muted = true;
@@ -53,7 +53,7 @@ function showSlide(index) {
   const titleLink = document.createElement("a");
   titleLink.href = link;
   titleLink.className = "slide_link";
-  titleLink.textContent = ausstellung.titel + " – zur Ausstellung ›";
+  titleLink.textContent = exhibition.titel + " – zur Ausstellung ›";
   slideContent.appendChild(titleLink);
 
   updateDots();
