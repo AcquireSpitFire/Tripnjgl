@@ -270,20 +270,20 @@ header > a {
   letter-spacing: 0.1em;
 }
 
-/* Slideshow oben (Deckblatt + alle Bilder). Gleicher Aufbau wie auf der
-   Startseite, aber so groß, dass sie samt Header auf den ersten
-   Bildschirm passt (13rem = Platz für Link, Titel, Thema und Punkte).
-   100vh ist der Rückfall für Browser ohne dvh. */
+/* Breite eines Galeriebildes – die Slideshow ist genauso groß */
+main {
+  --gallery-item-width: min(480px, 80%);
+}
+
+/* Slideshow oben (Deckblatt + alle Bilder), ohne Pfeile: nur Bild und
+   Punkte, linksbündig wie die Galerie */
 .exhibition_slideshow {
-  --show-width: calc((100vh - 13rem) * 3 / 2);
-  --show-width: calc((100dvh - 13rem) * 3 / 2);
-  grid-template-columns: auto minmax(0, var(--show-width)) auto;
-  justify-content: center;
+  grid-template-columns: var(--gallery-item-width);
+  justify-content: start;
   margin-bottom: 2rem;
 }
 
-/* Nur ein Bild: keine Pfeile, keine Punkte */
-.exhibition_slideshow.single .nav,
+/* Nur ein Bild: keine Punkte */
 .exhibition_slideshow.single #dots {
   visibility: hidden;
 }
@@ -311,7 +311,7 @@ header > a {
 
 .galerie > * {
   flex: none;
-  width: min(480px, 80%);
+  width: var(--gallery-item-width);
   scroll-snap-align: start;
 }
 
@@ -335,6 +335,11 @@ header > a {
     right: calc(-1 * var(--page-pad));
   }
 
+  /* Galeriebilder (und damit die Slideshow der Ausstellung) volle Breite */
+  main {
+    --gallery-item-width: 100%;
+  }
+
   /* Galerie: alle Bilder untereinander zum Runterscrollen (statt Band) */
   .galerie {
     display: grid;
@@ -344,9 +349,6 @@ header > a {
     padding-bottom: 0;
   }
 
-  .galerie > * {
-    width: 100%;
-  }
 }
 
 

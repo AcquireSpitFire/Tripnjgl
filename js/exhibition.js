@@ -72,10 +72,6 @@ function nextSlide() {
   showSlide(currentSlide + 1);
 }
 
-function previousSlide() {
-  showSlide(currentSlide - 1);
-}
-
 function startTimer(duration) {
   clearTimeout(timer);
 
@@ -120,13 +116,10 @@ function setupSlideshow(exhibition) {
     return;
   }
 
-  // Pfeile und Punkte nur, wenn es mehr als ein Bild gibt
+  // Punkte nur, wenn es mehr als ein Bild gibt
   if (slides.length === 1) {
     slideshowElement.classList.add("single");
   }
-
-  document.getElementById("next").addEventListener("click", nextSlide);
-  document.getElementById("prev").addEventListener("click", previousSlide);
 
   showSlide(0);
 }
