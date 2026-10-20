@@ -1,4 +1,23 @@
-/* Tripnjungle – minimales Design, schwarzer Hintergrund */
+/* =====================================================================
+   Tripnjungle – minimales Design, schwarzer Hintergrund
+
+   Aufbau dieser Datei:
+     1. Variablen
+     2. Grundlagen        (gilt überall)
+     3. Seitenaufbau      (Header, Inhalt)
+     4. Medien            (Bilder, Videos)
+     5. Startseite        (index.html – Slideshow)
+     6. Ausstellung       (exhibition.html – Slideshow + Galerie-Band)
+     7. Handy             (schmale Bildschirme)
+     8. Handy hochkant
+     9. Handy quer        (niedrige Bildschirme)
+
+   Die Abschnitte 1–6 gelten für alle Geräte (Desktop-Ansicht).
+   Die Abschnitte 7–9 überschreiben nur, was am Handy anders ist.
+   ===================================================================== */
+
+
+/* ---------- 1. Variablen ---------- */
 
 :root {
   --bg: #000;
@@ -7,11 +26,11 @@
   --frame: #0d0d0d;          /* Rahmen hinter den Medien, kaum sichtbar */
   --media-ratio: 3 / 2;      /* Einheitliches Format für alle Bilder/Videos */
   --gap: 1rem;
-  /* Maximale Breite der großen Medien (Slideshow und Deckblatt der Ausstellung):
-     so breit, dass das 3:2-Bild samt Rest auf den Bildschirm passt.
-     16rem = Platz für Header, Text, Link und Punkte */
-  --media-max-width: calc((100dvh - 16rem) * 3 / 2);
+  --page-pad: clamp(1rem, 4vw, 3rem);   /* seitlicher Seitenrand */
 }
+
+
+/* ---------- 2. Grundlagen ---------- */
 
 * {
   box-sizing: border-box;
@@ -19,27 +38,22 @@
 
 html {
   color-scheme: dark;
-  overflow-x: clip;          /* verhindert seitliches Scrollen durch die Klickflächen der Pfeile */
+  overflow-x: hidden;        /* kein seitliches Scrollen (Rückfall für ältere Browser) */
+  overflow-x: clip;
+  -webkit-text-size-adjust: 100%;   /* keine automatische Schriftvergrößerung am Handy */
+  text-size-adjust: 100%;
 }
 
 body {
+  overflow-x: hidden;        /* zusätzlich am body, mobile Browser ignorieren es am html teilweise */
+  overflow-x: clip;
   margin: 0;
-  padding: 2rem clamp(1rem, 4vw, 3rem);
+  padding: 2rem var(--page-pad);
   background: var(--bg);
   color: var(--text);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   font-size: 1rem;
   line-height: 1.6;
-}
-
-main {
-  max-width: 1200px;
-  margin: 0 auto;
-}
-
-header {
-  max-width: 1200px;
-  margin: 0 auto 2rem;
 }
 
 h1 {
@@ -48,11 +62,13 @@ h1 {
   font-weight: 400;
   letter-spacing: 0.3em;
   text-transform: uppercase;
+  overflow-wrap: anywhere;   /* lange Titel brechen um, statt die Seite zu verbreitern */
 }
 
 p {
   margin: 0 0 1.5rem;
   color: var(--muted);
+  overflow-wrap: anywhere;
 }
 
 a {
@@ -66,6 +82,22 @@ a:focus-visible {
   color: var(--text);
 }
 
+
+/* ---------- 3. Seitenaufbau ---------- */
+
+header {
+  max-width: 1200px;
+  margin: 0 auto 2rem;
+}
+
+main {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+
+/* ---------- 4. Medien ---------- */
+
 /* Alle Medien: gleiche Größe, nichts wird abgeschnitten */
 img,
 video {
@@ -76,18 +108,82 @@ video {
   background: var(--frame);
 }
 
-/* ---------- Slideshow (index.html) ---------- */
+
+/* ---------- 5. Startseite (index.html) ---------- */
+
+/* Seitenrahmen: <html class="fit">
+   Die Seite ist genau so groß wie der Bildschirm und fest fixiert:
+   nichts lässt sich scrollen oder verschieben. Das Bild füllt den
+   Platz, der neben Header, Text, Link und Punkten übrig bleibt. */
+
+.fit,
+.fit body {
+  height: 100%;
+  overflow: hidden;
+  overscroll-behavior: none;   /* kein Nachfedern am Rand */
+}
+
+.fit body {
+  position: fixed;             /* verhindert jedes Verschieben, auch auf dem iPhone */
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.fit header {
+  width: 100%;
+  flex: none;
+}
+
+.fit main {
+  width: 100%;
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.fit main > p {
+  flex: none;
+}
+
+/* Slideshow: Pfeil | Bild | Pfeil, darunter die Punkte */
 
 .slideshow {
   display: grid;
-  grid-template-columns: auto minmax(0, var(--media-max-width)) auto;
-  justify-content: center;
+  grid-template-columns: auto 1fr auto;
   align-items: center;
   gap: var(--gap);
 }
 
+.fit .slideshow {
+  flex: 1;
+  min-height: 0;
+  grid-template-rows: minmax(0, 1fr) auto;
+}
+
 .slide_content {
   min-width: 0;
+}
+
+/* Der freie Platz für Bild + Link wird gemessen (Container Query) */
+.fit .slide_content {
+  height: 100%;
+  container-type: size;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;   /* Bild mittig im freien Platz */
+  align-items: center;
+}
+
+/* Bild so groß wie möglich: so breit wie der Platz erlaubt, aber nur so
+   hoch, dass der Link (ca. 2.5rem) noch darunter passt */
+.fit .slide_content > * {
+  width: min(100cqw, (100cqh - 2.5rem) * 3 / 2);
+}
+
+.fit .slide_content > a:not(.slide_link) {
+  display: block;
 }
 
 .slide_link {
@@ -96,6 +192,8 @@ video {
   font-size: 0.85rem;
   letter-spacing: 0.1em;
 }
+
+/* Pfeile */
 
 .nav {
   position: relative;
@@ -108,6 +206,11 @@ video {
   line-height: 1;
   cursor: pointer;
   transition: color 0.2s;
+}
+
+.nav:hover,
+.nav:focus-visible {
+  color: var(--text);
 }
 
 /* Unsichtbare Erweiterung der Klickfläche: vom Rand des Mediums bis zum
@@ -129,10 +232,7 @@ video {
   right: -100vw;                    /* bis weit über den rechten Seitenrand */
 }
 
-.nav:hover,
-.nav:focus-visible {
-  color: var(--text);
-}
+/* Punkte */
 
 #dots {
   grid-column: 1 / -1;
@@ -155,7 +255,8 @@ video {
   background: var(--text);
 }
 
-/* ---------- Ausstellung (ausstellung.html) ---------- */
+
+/* ---------- 6. Ausstellung (exhibition.html) ---------- */
 
 header > a {
   display: inline-block;
@@ -169,9 +270,26 @@ header > a {
   letter-spacing: 0.1em;
 }
 
-#front_page {
-  max-width: var(--media-max-width);   /* gleiche Größe wie in der Slideshow */
-  margin: 0 auto 2rem;                 /* mittig, wie in der Slideshow */
+/* Breite eines Galeriebildes – die Slideshow ist genauso groß */
+main {
+  --gallery-item-width: min(480px, 80%);
+}
+
+/* Slideshow oben (Deckblatt + alle Bilder), ohne Pfeile: nur Bild und
+   Punkte, linksbündig wie die Galerie */
+.exhibition_slideshow {
+  grid-template-columns: var(--gallery-item-width);
+  justify-content: start;
+  margin-bottom: 2rem;
+}
+
+/* Nur ein Bild: keine Punkte */
+.exhibition_slideshow.single #dots {
+  visibility: hidden;
+}
+
+[hidden] {
+  display: none !important;
 }
 
 #description {
@@ -179,20 +297,157 @@ header > a {
   margin-bottom: 3rem;
 }
 
+/* Galerie als Band: alle Bilder nebeneinander, das Band scrollt seitlich
+   (die Seite selbst nicht). Beim Scrollen rastet jedes Bild ein. */
 .galerie {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  display: flex;
   gap: var(--gap);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;   /* am Ende des Bandes nicht „zurück“ blättern */
+  scroll-snap-type: x mandatory;
+  padding-bottom: 0.75rem;          /* Platz für die Scrollleiste */
+  scrollbar-color: #333 transparent;
 }
 
-/* Schmale Bildschirme: Pfeile kleiner */
+.galerie > * {
+  flex: none;
+  width: var(--gallery-item-width);
+  scroll-snap-align: start;
+}
+
+/* Vollbild-Ansicht: Klick auf ein Bild zeigt es bildschirmfüllend */
+
+.exhibition_slideshow img,
+.galerie img {
+  cursor: zoom-in;
+}
+
+.viewer {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--bg);
+  cursor: zoom-out;
+}
+
+.viewer img {
+  width: 100%;
+  height: 100%;
+  aspect-ratio: auto;
+  object-fit: contain;      /* ganzes Bild, nichts abgeschnitten */
+  background: none;
+}
+
+.viewer_close {
+  position: absolute;
+  top: 0.5rem;
+  right: 0.75rem;
+  z-index: 1;
+  padding: 0.25rem 0.5rem;
+  border: 0;
+  background: none;
+  color: var(--muted);
+  font-size: 2rem;
+  line-height: 1;
+  text-shadow: 0 0 6px #000;   /* auch auf hellen Bildern sichtbar */
+  cursor: pointer;
+}
+
+.viewer_close:hover,
+.viewer_close:focus-visible {
+  color: var(--text);
+}
+
+/* Seite dahinter nicht scrollen, solange das Bild offen ist */
+.viewer_open,
+.viewer_open body {
+  overflow: hidden;
+}
+
+
+/* ---------- 7. Handy (schmale Bildschirme) ---------- */
+
 @media (max-width: 600px) {
+  /* Pfeile kleiner */
   .nav {
     font-size: 1.5rem;
     padding: 0.25rem;
   }
 
+  /* Klickflächen enden genau am Bildschirmrand (= Seitenrand des body),
+     damit die Seite nicht breiter als der Bildschirm wird */
+  .prev::before {
+    left: calc(-1 * var(--page-pad));
+  }
+
+  .next::before {
+    right: calc(-1 * var(--page-pad));
+  }
+
+  /* Galeriebilder (und damit die Slideshow der Ausstellung) volle Breite */
+  main {
+    --gallery-item-width: 100%;
+  }
+
+  /* Galerie: alle Bilder untereinander zum Runterscrollen (statt Band) */
   .galerie {
+    display: grid;
     grid-template-columns: 1fr;
+    overflow-x: visible;
+    scroll-snap-type: none;
+    padding-bottom: 0;
+  }
+
+}
+
+
+/* ---------- 8. Handy hochkant ---------- */
+
+/* Das Querformat-Bild ist hier immer viel niedriger als der Bildschirm.
+   Statt es mittig zu zeigen, stehen Bild, Link und Punkte als Block
+   direkt unter dem Begrüßungstext. */
+@media (max-width: 600px) and (orientation: portrait) {
+  .fit .slideshow {
+    flex: none;
+    grid-template-rows: auto auto;
+    align-content: start;
+  }
+
+  .fit .slide_content {
+    height: auto;
+    container-type: inline-size;   /* nur die Breite messen, Höhe ergibt sich aus dem Bild */
+  }
+
+  .fit .slide_content > * {
+    width: 100%;
+  }
+}
+
+
+/* ---------- 9. Handy quer (niedrige Bildschirme) ---------- */
+
+/* Weniger Abstände, damit das Bild größer ist */
+@media (max-height: 500px) {
+  .fit body {
+    padding-block: 0.75rem;
+  }
+
+  .fit header {
+    margin-bottom: 0.5rem;
+  }
+
+  .fit main > p {
+    margin-bottom: 0.5rem;
+  }
+
+  .fit .slideshow {
+    row-gap: 0.5rem;
+  }
+
+  .fit .slide_link {
+    margin-top: 0.25rem;
   }
 }

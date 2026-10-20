@@ -4,7 +4,7 @@
     "titel": "Exhibition 1",
     "front_page": {
       "type": "image",
-      "src": "data/image/000571250029.jpg",
+      "src": "data/image/wanderTrip2.0/wanderTrip (2).jpg",
       "alt": "Landschaft"
     }
   },
@@ -13,7 +13,7 @@
     "titel": "Exhibition 2",
     "front_page": {
       "type": "image",
-      "src": "data/image/000578040028.jpg"
+      "src": "data/image/city-night-life/nightlifeCinematicKippe.jpg"
     }
   }
 ]

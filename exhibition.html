@@ -14,12 +14,25 @@
 	</header>
 
 	<main>
-		<div id="front_page"></div>
+		<!-- Slideshow: Deckblatt + alle Bilder/Videos der Ausstellung -->
+		<div id="slideshow" class="slideshow exhibition_slideshow">
+
+			<div id="slide_content" class="slide_content"></div>
+
+			<div id="dots"></div>
+
+		</div>
 
 		<p id="description"></p>
 
 		<div id="galerie" class="galerie"></div>
 	</main>
+
+	<!-- Vollbild-Ansicht: öffnet sich beim Klick auf ein Bild -->
+	<div id="viewer" class="viewer" hidden>
+		<button id="viewer_close" class="viewer_close" aria-label="Schließen">×</button>
+		<img id="viewer_image" alt="">
+	</div>
     <script src="js/exhibition.js"></script>
 </body>
 </html>
