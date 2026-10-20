@@ -1,15 +1,27 @@
 {
   "id": "exhibition-2",
-  "titel": "Exhibition 2",
-  "theme": "Theme der Ausstellung",
-  "description": "Beschreibung der Ausstellung.",
+  "title": "Exhibition 2",
+  "theme": "city night-life Trip",
+  "description": "Living and growing up in a big city is a unique experience. Exploring the city's nightlife feels like a parallel world. Here are the impressions I captured.",
   "front_page": {
     "type": "image",
-    "src": "data/image/000578040028.jpg"
+    "src": "data/image/city-night-life/nightlifeCinematicKippe.jpg"
   },
   "medien": [
-    { "id": "exhibition-2-1", "type": "image", "src": "data/image/000578040028.jpg", "alt": "" },
-    { "id": "exhibition-2-2", "type": "image", "src": "data/image/000578040019.jpg", "alt": "" },
-    { "id": "exhibition-2-3", "type": "video", "src": "data/video/PXL_20250109_214858313.TS.mp4" }
+    { "id": "exhibition-2-1", "type": "image", "src": "data/image/city-night-life/nightlifeKasparInfront.jpg", "alt": "" },
+    { "id": "exhibition-2-2", "type": "image", "src": "data/image/city-night-life/nightlifeFriendsWithGucci.jpg", "alt": "" },
+    { "id": "exhibition-2-3", "type": "image", "src": "data/image/city-night-life/nightlifeDj.jpg", "alt": "" },
+    { "id": "exhibition-2-4", "type": "image", "src": "data/image/city-night-life/nightlifeUnderground.jpg", "alt": "" }, 
+    { "id": "exhibition-2-5", "type": "image", "src": "data/image/city-night-life/nightlifeVino.jpg", "alt": "" },
+    { "id": "exhibition-2-6", "type": "image", "src": "data/image/city-night-life/nightlifeKasparMickKlo.jpg", "alt": "" },
+    { "id": "exhibition-2-7", "type": "image", "src": "data/image/city-night-life/nightlifeNils.jpg", "alt": "" },
+    { "id": "exhibition-2-8", "type": "image", "src": "data/image/city-night-life/nightlifeFriendsWithGucci.jpg", "alt": "" },
+    { "id": "exhibition-2-9", "type": "image", "src": "data/image/city-night-life/nightlifeDj.jpg", "alt": "" },
+    { "id": "exhibition-2-10", "type": "image", "src": "data/image/city-night-life/nightlifeKasparInfront.jpg", "alt": "" },
+    { "id": "exhibition-2-11", "type": "image", "src": "data/image/city-night-life/nightlifeUnderground.jpg", "alt": "" },
+    { "id": "exhibition-2-12", "type": "image", "src": "data/image/city-night-life/nightlifeStangers.jpg", "alt": "" },
+    { "id": "exhibition-2-13", "type": "image", "src": "data/image/city-night-life/nightlifeGirlsToTaktor.jpg", "alt": "" },
+    { "id": "exhibition-2-14", "type": "image", "src": "data/image/city-night-life/nightlifeHarterMorgen.jpg", "alt": "" },
+    { "id": "exhibition-2-15", "type": "image", "src": "data/image/city-night-life/nightlifeCinematicKippe.jpg", "alt": "" }
   ]
 }
