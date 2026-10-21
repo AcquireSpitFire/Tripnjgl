@@ -169,6 +169,8 @@ function setupSlideshow(exhibition) {
     slideshowElement.classList.add("single");
   }
 
+  document.getElementById("next").addEventListener("click", nextSlide);
+  document.getElementById("prev").addEventListener("click", previousSlide);
   setupSwipe();
   setupKeys();
   showSlide(0);

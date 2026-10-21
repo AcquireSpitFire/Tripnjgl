@@ -276,15 +276,24 @@ main {
   --gallery-item-width: min(480px, 80%);
 }
 
-/* Slideshow oben (Deckblatt + alle Bilder), ohne Pfeile: nur Bild und
-   Punkte, linksbündig wie die Galerie */
+/* Slideshow oben (Deckblatt + alle Bilder): Pfeil | Bild | Pfeil wie auf
+   der Startseite, damit das Bild am Desktop genauso groß ist wie dort */
 .exhibition_slideshow {
-  grid-template-columns: var(--gallery-item-width);
-  justify-content: start;
   margin-bottom: 2rem;
 }
 
-/* Nur ein Bild: keine Punkte */
+/* Gleiche Größe wie auf der Startseite: so breit wie der Platz erlaubt,
+   aber nur so hoch, wie dort der Platz für das Bild ist. Dort bleibt vom
+   Bildschirm übrig, was nicht belegt ist von: Seitenrand oben+unten (4rem),
+   Titel (1.76rem) + Abstand (2rem), Begrüßungstext (1.6rem) + Abstand (1.5rem),
+   Abstand + Punkte (1rem + 6px) und Link unter dem Bild (2.5rem) */
+.exhibition_slideshow .slide_content > * {
+  width: min(100%, (100vh - 14.36rem - 6px) * 3 / 2);
+  margin-inline: auto;
+}
+
+/* Nur ein Bild: keine Pfeile und Punkte (Platz bleibt gleich) */
+.exhibition_slideshow.single .nav,
 .exhibition_slideshow.single #dots {
   visibility: hidden;
 }
@@ -388,9 +397,22 @@ main {
     right: calc(-1 * var(--page-pad));
   }
 
-  /* Galeriebilder (und damit die Slideshow der Ausstellung) volle Breite */
+  /* Galeriebilder volle Breite */
   main {
     --gallery-item-width: 100%;
+  }
+
+  /* Slideshow der Ausstellung: ohne Pfeile (wischen), volle Breite */
+  .exhibition_slideshow {
+    grid-template-columns: 1fr;
+  }
+
+  .exhibition_slideshow .nav {
+    display: none;
+  }
+
+  .exhibition_slideshow .slide_content > * {
+    width: 100%;
   }
 
   /* Galerie: alle Bilder untereinander zum Runterscrollen (statt Band) */
