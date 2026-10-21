@@ -17,6 +17,11 @@ let slides = [];
 let currentSlide = 0;
 let timer;
 
+// Name eines Bildes/Videos: "name" aus der JSON, sonst der alt-Text
+function getName(item) {
+  return item.name || item.alt || "";
+}
+
 function createMedia(item) {
   if (item.type === "video") {
     const video = document.createElement("video");
@@ -64,6 +69,14 @@ function showSlide(index) {
     slideContent.appendChild(image);
     startTimer(5000);
   }
+
+  // Name unter dem Bild, wie der Link auf der Startseite. Die Zeile ist
+  // immer da, auch ohne Namen, damit die Punkte nicht springen.
+  const caption = document.createElement("p");
+
+  caption.className = "slide_caption";
+  caption.textContent = getName(item);
+  slideContent.appendChild(caption);
 
   updateDots();
 }
@@ -180,14 +193,26 @@ function setupSlideshow(exhibition) {
 
 function setupGalerie(exhibition) {
   (exhibition.medien || []).forEach((item) => {
-    const media = createMedia(item);
+    // Jedes Bild/Video steckt in einer <figure>, darunter sein Name (falls vorhanden)
+    const figure = document.createElement("figure");
+    const name = getName(item);
+
+    figure.appendChild(createMedia(item));
+
+    if (name) {
+      const caption = document.createElement("figcaption");
+
+      caption.className = "caption";
+      caption.textContent = name;
+      figure.appendChild(caption);
+    }
 
     // Jedes Foto/Video hat eine id, z. B. für Links wie exhibition.html?id=...#exhibition-1-2
     if (item.id) {
-      media.id = item.id;
+      figure.id = item.id;
     }
 
-    galerieElement.appendChild(media);
+    galerieElement.appendChild(figure);
   });
 
   // Desktop: das Mausrad scrollt das Band seitlich. Am Anfang/Ende des

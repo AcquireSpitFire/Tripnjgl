@@ -187,11 +187,17 @@ video {
   display: block;
 }
 
-.slide_link {
+/* Link unter dem Bild (Startseite) bzw. Name des Bildes (Ausstellung) */
+.slide_link,
+.slide_caption {
   display: block;
-  margin-top: 0.75rem;
+  margin: 0.75rem 0 0;
   font-size: 0.85rem;
   letter-spacing: 0.1em;
+}
+
+.slide_caption {
+  min-height: 1.6em;         /* eine Zeile hoch, auch ohne Namen */
 }
 
 /* Pfeile */
@@ -292,6 +298,14 @@ main {
   margin-inline: auto;
 }
 
+/* Name eines Bildes in der Galerie */
+.caption {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  color: var(--muted);
+}
+
 /* Nur ein Bild: keine Pfeile und Punkte (Platz bleibt gleich) */
 .exhibition_slideshow.single .nav,
 .exhibition_slideshow.single #dots {
@@ -322,6 +336,7 @@ main {
 .galerie > * {
   flex: none;
   width: var(--gallery-item-width);
+  margin: 0;                 /* <figure> hat sonst einen Rand */
   scroll-snap-align: start;
 }
 
