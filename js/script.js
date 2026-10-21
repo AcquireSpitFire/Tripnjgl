@@ -67,6 +67,49 @@ function previousSlide() {
   showSlide(currentSlide - 1);
 }
 
+// Wischen nach links = nächster Slide, nach rechts = vorheriger Slide
+function setupSwipe() {
+  let startX = 0;
+  let startY = 0;
+
+  slideContent.addEventListener("touchstart", (event) => {
+    startX = event.touches[0].clientX;
+    startY = event.touches[0].clientY;
+  }, { passive: true });
+
+  slideContent.addEventListener("touchend", (event) => {
+    const deltaX = event.changedTouches[0].clientX - startX;
+    const deltaY = event.changedTouches[0].clientY - startY;
+
+    // Nur deutliche, eher waagrechte Wischer zählen (kein Scrollen, kein Tippen)
+    if (Math.abs(deltaX) < 50 || Math.abs(deltaX) < Math.abs(deltaY)) {
+      return;
+    }
+
+    if (deltaX < 0) {
+      nextSlide();
+    } else {
+      previousSlide();
+    }
+  });
+}
+
+// Pfeiltaste rechts = nächster Slide, links = vorheriger Slide
+function setupKeys() {
+  document.addEventListener("keydown", (event) => {
+    // Ein Video mit Fokus nutzt die Pfeiltasten selbst zum Spulen
+    if (event.target.tagName === "VIDEO") {
+      return;
+    }
+
+    if (event.key === "ArrowRight") {
+      nextSlide();
+    } else if (event.key === "ArrowLeft") {
+      previousSlide();
+    }
+  });
+}
+
 function startTimer(duration) {
   clearTimeout(timer);
   timer = setTimeout(nextSlide, duration);
@@ -115,6 +158,8 @@ async function loadSlides() {
 
   document.getElementById("next").addEventListener("click", nextSlide);
   document.getElementById("prev").addEventListener("click", previousSlide);
+  setupSwipe();
+  setupKeys();
 
   showSlide(0);
 }

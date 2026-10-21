@@ -72,6 +72,54 @@ function nextSlide() {
   showSlide(currentSlide + 1);
 }
 
+function previousSlide() {
+  showSlide(currentSlide - 1);
+}
+
+// Wischen nach links = nächstes Bild, nach rechts = vorheriges Bild
+function setupSwipe() {
+  let startX = 0;
+  let startY = 0;
+
+  slideContent.addEventListener("touchstart", (event) => {
+    startX = event.touches[0].clientX;
+    startY = event.touches[0].clientY;
+  }, { passive: true });
+
+  slideContent.addEventListener("touchend", (event) => {
+    const deltaX = event.changedTouches[0].clientX - startX;
+    const deltaY = event.changedTouches[0].clientY - startY;
+
+    // Nur deutliche, eher waagrechte Wischer zählen (kein Scrollen, kein Tippen)
+    if (slides.length < 2 || Math.abs(deltaX) < 50 || Math.abs(deltaX) < Math.abs(deltaY)) {
+      return;
+    }
+
+    if (deltaX < 0) {
+      nextSlide();
+    } else {
+      previousSlide();
+    }
+  });
+}
+
+// Pfeiltaste rechts = nächstes Bild, links = vorheriges Bild
+function setupKeys() {
+  document.addEventListener("keydown", (event) => {
+    // Ein Video mit Fokus nutzt die Pfeiltasten selbst zum Spulen,
+    // und solange ein Bild im Vollbild offen ist, bleibt die Slideshow stehen
+    if (slides.length < 2 || event.target.tagName === "VIDEO" || !viewerElement.hidden) {
+      return;
+    }
+
+    if (event.key === "ArrowRight") {
+      nextSlide();
+    } else if (event.key === "ArrowLeft") {
+      previousSlide();
+    }
+  });
+}
+
 function startTimer(duration) {
   clearTimeout(timer);
 
@@ -121,6 +169,8 @@ function setupSlideshow(exhibition) {
     slideshowElement.classList.add("single");
   }
 
+  setupSwipe();
+  setupKeys();
   showSlide(0);
 }
 

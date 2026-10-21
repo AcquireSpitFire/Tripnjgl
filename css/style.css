@@ -164,6 +164,7 @@ video {
 
 .slide_content {
   min-width: 0;
+  touch-action: pan-y;   /* senkrecht scrollt die Seite, waagrecht wischt die Slideshow */
 }
 
 /* Der freie Platz für Bild + Link wird gemessen (Container Query) */
