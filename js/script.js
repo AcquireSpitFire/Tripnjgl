@@ -18,7 +18,7 @@ function showSlide(index) {
 
   slideContent.innerHTML = "";
 
-  if (front_page.type === "image") {
+  if (front_page?.type === "image") {
     // Das ganze Bild ist ein Link zur Ausstellung
     const anchor = document.createElement("a");
     anchor.href = link;
@@ -33,7 +33,7 @@ function showSlide(index) {
     startTimer(5000);
   }
 
-  if (front_page.type === "video") {
+  if (front_page?.type === "video") {
     const video = document.createElement("video");
 
     video.src = front_page.src;
@@ -46,6 +46,8 @@ function showSlide(index) {
 
     // Nach dem Ende des Videos zum nächsten Slide wechseln
     video.addEventListener("ended", nextSlide);
+  } else if (!front_page) {
+    startTimer(5000);
   }
 
   // Titel als Link unter jedem Slide (bei Videos der einzige Link,
@@ -144,7 +146,38 @@ async function loadSlides() {
       throw new Error("HTTP " + response.status);
     }
 
-    slides = await response.json();
+    const exhibitions = await response.json();
+    slides = await Promise.all(exhibitions.map(async (exhibition) => {
+      const frontPageReference = exhibition.front_page;
+
+      if (!frontPageReference?.id || frontPageReference.src) {
+        return exhibition;
+      }
+
+      try {
+        const exhibitionResponse = await fetch(
+          "data/exhibitions/" + encodeURIComponent(exhibition.id) + ".json"
+        );
+
+        if (!exhibitionResponse.ok) {
+          throw new Error("HTTP " + exhibitionResponse.status);
+        }
+
+        const exhibitionData = await exhibitionResponse.json();
+        const media = (exhibitionData.medien || []).find(
+          (item) => item.id === frontPageReference.id
+        );
+
+        if (!media) {
+          throw new Error("Deckblatt-Medium nicht gefunden: " + frontPageReference.id);
+        }
+
+        return { ...exhibition, front_page: media };
+      } catch (error) {
+        console.error("Deckblatt für „" + exhibition.id + "“ konnte nicht geladen werden.", error);
+        return { ...exhibition, front_page: null };
+      }
+    }));
   } catch (error) {
     slideContent.textContent = "Ausstellungen konnten nicht geladen werden.";
     console.error(error);

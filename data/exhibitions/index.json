@@ -3,16 +3,14 @@
     "id": "exhibition-1",
     "titel": "Exhibition 1",
     "front_page": {
-      "type": "image",
-      "src": "data/image/wanderTrip2.0/wanderTrip (2).jpg"
+      "id": "exhibition-1-1"
     }
   },
   {
     "id": "exhibition-2",
     "titel": "Exhibition 2",
     "front_page": {
-      "type": "image",
-      "src": "data/image/city-night-life/nightlifeCinematicKippe.jpg"
+      "id": "exhibition-2-5"
     }
   }
 ]
