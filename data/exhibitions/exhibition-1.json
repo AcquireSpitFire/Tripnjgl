@@ -5,7 +5,7 @@
   "description": "Beschreibung der Ausstellung.",
   "front_page": {
     "type": "image",
-    "src": "data/image/wanderTrip2.0/wanderTrip (2).jpg",
+    "src": "data/image/wanderTrip2.0/wanderTrip (2).jpg"
   },
   "medien": [
     { "id": "exhibition-1-1", "type": "image", "src": "data/image/wanderTrip2.0/wanderTrip (2).jpg", "alt": "" },
