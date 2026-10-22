@@ -4,8 +4,7 @@
   "theme": "city night-life Trip",
   "description": "Living and growing up in a big city is a unique experience. Exploring the city's nightlife feels like a parallel world. Here are the impressions I captured.",
   "front_page": {
-    "type": "image",
-    "src": "data/image/city-night-life/nightlifeVino.jpg"
+    "id": "exhibition-2-5"
   },
   "medien": [
     { "id": "exhibition-2-5", "type": "image", "src": "data/image/city-night-life/nightlifeVino.jpg" },

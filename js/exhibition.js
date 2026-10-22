@@ -165,11 +165,14 @@ function updateDots() {
 
 function setupSlideshow(exhibition) {
   // Deckblatt zuerst, danach alle Medien – ohne das Deckblatt doppelt zu zeigen
-  const frontPage = exhibition.front_page;
   const medien = exhibition.medien || [];
+  const frontPageReference = exhibition.front_page;
+  const frontPage = frontPageReference?.src
+    ? frontPageReference
+    : medien.find((item) => item.id === frontPageReference?.id);
 
   slides = frontPage
-    ? [frontPage, ...medien.filter((item) => item.src !== frontPage.src)]
+    ? [frontPage, ...medien.filter((item) => item.id !== frontPage.id && item.src !== frontPage.src)]
     : medien.slice();
 
   if (slides.length === 0) {
