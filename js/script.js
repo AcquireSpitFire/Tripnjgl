@@ -1,5 +1,6 @@
-// Die Slides werden aus data/ausstellungen/index.json geladen:
+// Die Ausstellungen werden aus data/exhibitions/index.json geladen:
 // jede Ausstellung ist ein Slide mit ihrem Deckblatt.
+// Gibt es eine kommende Ausstellung, steht ihr Poster über der Slideshow.
 let slides = [];
 
 let currentSlide = 0;
@@ -7,6 +8,11 @@ let timer;
 
 const slideContent = document.getElementById("slide_content");
 const dotsContainer = document.getElementById("dots");
+const posterContainer = document.getElementById("front_poster");
+
+function getExhibitionLink(exhibition) {
+  return "exhibition.html?id=" + encodeURIComponent(exhibition.id);
+}
 
 function showSlide(index) {
   clearTimeout(timer);
@@ -14,7 +20,7 @@ function showSlide(index) {
 
   const exhibition = slides[currentSlide];
   const front_page = exhibition.front_page;
-  const link = "exhibition.html?id=" + encodeURIComponent(exhibition.id);
+  const link = getExhibitionLink(exhibition);
 
   slideContent.innerHTML = "";
 
@@ -138,56 +144,136 @@ function updateDots() {
   });
 }
 
-async function loadSlides() {
-  try {
-    const response = await fetch("data/exhibitions/index.json");
+// ---------- Poster ----------
 
-    if (!response.ok) {
-      throw new Error("HTTP " + response.status);
+// "JJJJ-MM-TT" → Datum (lokale Zeit), bei ungültigem Datum null
+function parseDate(exhibition) {
+  if (!exhibition.date) {
+    return null;
+  }
+
+  const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(exhibition.date);
+  const date = match && new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
+
+  // new Date() rechnet z. B. Monat 24 einfach um, das wäre ein falsches Datum
+  if (!date || date.getMonth() !== Number(match[2]) - 1 || date.getDate() !== Number(match[3])) {
+    console.warn("Ungültiges Datum bei „" + exhibition.id + "“ (erwartet JJJJ-MM-TT):", exhibition.date);
+    return null;
+  }
+
+  return date;
+}
+
+// Nummer aus der id: "exhibition-12" → 12
+function getNumber(exhibition) {
+  const match = /(\d+)$/.exec(exhibition.id);
+
+  return match ? Number(match[1]) : Infinity;
+}
+
+// Die Ausstellung mit dem frühesten Datum ab heute,
+// bei gleichem Datum die mit der geringsten Nummer
+function findNextExhibition(exhibitions) {
+  const today = new Date();
+
+  today.setHours(0, 0, 0, 0);
+
+  const upcoming = exhibitions
+    .filter((exhibition) => exhibition.poster?.src)
+    .map((exhibition) => ({ exhibition, date: parseDate(exhibition) }))
+    .filter(({ date }) => date && date >= today)
+    .sort((a, b) => (a.date - b.date) || (getNumber(a.exhibition) - getNumber(b.exhibition)));
+
+  return upcoming[0]?.exhibition;
+}
+
+// Das Poster nimmt den Platz der Slideshow ein, die Slideshow rutscht
+// darunter. Die Seite passt dann nicht mehr auf einen Bildschirm und scrollt.
+function showPoster(exhibition) {
+  const anchor = document.createElement("a");
+  const image = document.createElement("img");
+
+  anchor.href = getExhibitionLink(exhibition);
+  image.src = exhibition.poster.src;
+  image.alt = exhibition.poster.alt || "Poster: " + exhibition.titel;
+
+  anchor.appendChild(image);
+  posterContainer.appendChild(anchor);
+  posterContainer.hidden = false;
+  document.documentElement.classList.replace("fit", "has_poster");
+}
+
+// ---------- Laden ----------
+
+// Ergänzt das Deckblatt (in der JSON nur eine id) um das passende Medium
+function resolveFrontPage(exhibition) {
+  const frontPageReference = exhibition.front_page;
+
+  if (!frontPageReference?.id || frontPageReference.src) {
+    return exhibition;
+  }
+
+  const media = (exhibition.medien || []).find((item) => item.id === frontPageReference.id);
+
+  if (!media) {
+    console.error("Deckblatt-Medium nicht gefunden: " + frontPageReference.id);
+  }
+
+  return { ...exhibition, front_page: media || null };
+}
+
+// Lädt die Liste und ergänzt jeden Eintrag um die Daten aus seiner eigenen JSON
+async function loadExhibitions() {
+  const response = await fetch("data/exhibitions/index.json");
+
+  if (!response.ok) {
+    throw new Error("HTTP " + response.status);
+  }
+
+  const exhibitions = await response.json();
+
+  return Promise.all(exhibitions.map(async (entry) => {
+    try {
+      const exhibitionResponse = await fetch(
+        "data/exhibitions/" + encodeURIComponent(entry.id) + ".json"
+      );
+
+      if (!exhibitionResponse.ok) {
+        throw new Error("HTTP " + exhibitionResponse.status);
+      }
+
+      return { ...entry, ...(await exhibitionResponse.json()) };
+    } catch (error) {
+      console.error("Ausstellung „" + entry.id + "“ konnte nicht geladen werden.", error);
+      return entry;
     }
+  }));
+}
 
-    const exhibitions = await response.json();
-    slides = await Promise.all(exhibitions.map(async (exhibition) => {
-      const frontPageReference = exhibition.front_page;
+async function start() {
+  let exhibitions;
 
-      if (!frontPageReference?.id || frontPageReference.src) {
-        return exhibition;
-      }
-
-      try {
-        const exhibitionResponse = await fetch(
-          "data/exhibitions/" + encodeURIComponent(exhibition.id) + ".json"
-        );
-
-        if (!exhibitionResponse.ok) {
-          throw new Error("HTTP " + exhibitionResponse.status);
-        }
-
-        const exhibitionData = await exhibitionResponse.json();
-        const media = (exhibitionData.medien || []).find(
-          (item) => item.id === frontPageReference.id
-        );
-
-        if (!media) {
-          throw new Error("Deckblatt-Medium nicht gefunden: " + frontPageReference.id);
-        }
-
-        return { ...exhibition, front_page: media };
-      } catch (error) {
-        console.error("Deckblatt für „" + exhibition.id + "“ konnte nicht geladen werden.", error);
-        return { ...exhibition, front_page: null };
-      }
-    }));
+  try {
+    exhibitions = await loadExhibitions();
   } catch (error) {
     slideContent.textContent = "Ausstellungen konnten nicht geladen werden.";
     console.error(error);
     return;
   }
 
-  if (slides.length === 0) {
+  if (exhibitions.length === 0) {
     slideContent.textContent = "Noch keine Ausstellungen vorhanden.";
     return;
   }
+
+  // Poster vor der Slideshow einsetzen, damit nichts sichtbar springt
+  const nextExhibition = findNextExhibition(exhibitions);
+
+  if (nextExhibition) {
+    showPoster(nextExhibition);
+  }
+
+  slides = exhibitions.map(resolveFrontPage);
 
   document.getElementById("next").addEventListener("click", nextSlide);
   document.getElementById("prev").addEventListener("click", previousSlide);
@@ -197,4 +283,4 @@ async function loadSlides() {
   showSlide(0);
 }
 
-loadSlides();
+start();
