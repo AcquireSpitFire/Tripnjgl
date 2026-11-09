@@ -3,6 +3,13 @@
   "titel": "Exhibition 1",
   "theme": "Wander Trip",
   "description": "Beschreibung der Ausstellung.",
+  "date": "2026-12-24",
+  "poster": {
+    "id": "exhibition-1-poster",
+    "type": "poster",
+    "src": "data/image/poster/wanderTripPoster1.png",
+    "alt": "1"
+  },
   "front_page": {
     "id": "exhibition-1-1"
   },

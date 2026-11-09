@@ -147,6 +147,43 @@ video {
   flex: none;
 }
 
+/* Poster der nächsten Ausstellung (Hochformat). Es füllt den ersten
+   Bildschirm, die Slideshow rutscht darunter: <html class="has_poster">
+   ersetzt dann "fit", die Seite scrollt normal. */
+
+.poster {
+  --poster-max-height: max(20rem, 100svh - 12rem);   /* Platz unter Titel und Begrüßungstext */
+
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  /* Platz schon reservieren, bevor das Bild geladen ist (Format ca. 1 : 1.41) */
+  min-height: min(var(--poster-max-height), (100vw - 2 * var(--page-pad)) * 1.41);
+  margin-bottom: 3rem;
+}
+
+.poster a {
+  display: block;
+}
+
+.poster img {
+  width: auto;
+  height: auto;
+  max-width: calc(100vw - 2 * var(--page-pad));
+  max-height: var(--poster-max-height);
+  aspect-ratio: auto;
+}
+
+/* Slideshow unter dem Poster: gleich groß wie ohne Poster */
+.has_poster .slide_content > * {
+  width: min(100%, max(14rem, 100vh - 14.36rem - 6px) * 3 / 2);
+  margin-inline: auto;
+}
+
+.has_poster .slide_content > a:not(.slide_link) {
+  display: block;
+}
+
 /* Slideshow: Pfeil | Bild | Pfeil, darunter die Punkte */
 
 .slideshow {
