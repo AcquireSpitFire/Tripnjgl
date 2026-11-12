@@ -38,7 +38,12 @@ Medien, und die zugehörigen Dateien sind nicht abrufbar.
 - `scripts/import-json.ts` – Import der alten JSON-Dateien (`npm run import:json`)
 - `scripts/set-locked.ts` – Ausstellung per Kommandozeile sperren/entsperren (zum Testen):
   `npx tsx --env-file=.env scripts/set-locked.ts exhibition-2 true`
-- `public/` – Frontend (HTML/CSS/JS), `public/js/data.js` spricht die API an
+- `scripts/regenerate-sizes.ts` – Bildgrößen (thumb/medium/large als WebP) für alle Medien neu erzeugen:
+  `npm run media:regenerate` (nach Änderungen an `imageSizes` in `Media.ts`)
+- `src/templates/*.html` – die Seiten; `src/app/**/route.ts` liefert sie mit Titel, Beschreibung,
+  Open Graph und JSON-LD aus (`/`, `/exhibitions`, `/events`, `/archive`, `/about`, `/exhibition/<id>`)
+- `src/app/sitemap.xml`, `src/app/robots.txt` – SEO; alte Links (`/exhibition.html?id=…`) leiten um
+- `public/` – CSS, JS, Favicon, OG-Bild; `public/js/data.js` spricht die API an und wählt die Bildgröße
 - `tripnjungle.db` – die Datenbank (nicht im Git)
 - `media/` – hochgeladene Dateien (nicht im Git). Die Originale liegen weiter in
   `../data/image`, damit `npm run import:json` auf einem frischen Klon funktioniert.

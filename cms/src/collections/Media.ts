@@ -2,6 +2,12 @@ import type { CollectionConfig } from 'payload'
 
 // Bilder, Videos und Poster.
 //
+// Beim Upload entstehen drei WebP-Größen (das Original bleibt erhalten):
+//   thumb   600 px breit            Admin, Karten, Handy
+//   medium  1280 px längste Seite   Slideshow, Galerie, Poster in Listen
+//   large   2560 px längste Seite   Vollbild, Poster über der Slideshow (4K-Desktop)
+// Kleinere Originale werden nie vergrößert.
+//
 // "locked" wird nicht von Hand gesetzt, sondern vom Hook der Ausstellungen:
 // Poster sind immer öffentlich, Deckblatt und Medien einer Ausstellung sind
 // genau dann öffentlich, wenn die Ausstellung freigeschaltet ist.
@@ -28,7 +34,24 @@ export const Media: CollectionConfig = {
       {
         name: 'thumb',
         width: 600,
-        position: 'centre',
+        withoutEnlargement: true,
+        formatOptions: { format: 'webp', options: { quality: 75 } },
+      },
+      {
+        name: 'medium',
+        width: 1280,
+        height: 1280,
+        fit: 'inside',
+        withoutEnlargement: true,
+        formatOptions: { format: 'webp', options: { quality: 80 } },
+      },
+      {
+        name: 'large',
+        width: 2560,
+        height: 2560,
+        fit: 'inside',
+        withoutEnlargement: true,
+        formatOptions: { format: 'webp', options: { quality: 82 } },
       },
     ],
     adminThumbnail: 'thumb',
@@ -39,7 +62,7 @@ export const Media: CollectionConfig = {
       label: 'Alt-Text',
       type: 'text',
       admin: {
-        description: 'Kurze Bildbeschreibung (Barrierefreiheit).',
+        description: 'Kurze Bildbeschreibung (Barrierefreiheit, SEO).',
       },
     },
     {

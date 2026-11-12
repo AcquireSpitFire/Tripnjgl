@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>{{title}}</title>
+	<meta name="description" content="{{description}}">
+	<meta name="robots" content="{{robots}}">
+	<link rel="canonical" href="{{canonical}}">
+	<meta property="og:site_name" content="{{siteName}}">
+	<meta property="og:type" content="website">
+	<meta property="og:title" content="{{title}}">
+	<meta property="og:description" content="{{description}}">
+	<meta property="og:url" content="{{canonical}}">
+	<meta property="og:image" content="{{ogImage}}">
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:title" content="{{title}}">
+	<meta name="twitter:description" content="{{description}}">
+	<meta name="twitter:image" content="{{ogImage}}">
+	<meta name="theme-color" content="#000000">
+	<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+	<link rel="manifest" href="/manifest.webmanifest">
+	<link rel="stylesheet" href="/css/style.css">
+	{{{jsonLd}}}
+</head>
+<body>
+	<header>
+		<div class="header_inner">
+			<p class="site_name"><a href="/">Tripnjungle</a></p>
+			<h1 class="page_title">About</h1>
+		</div>
+	</header>
+
+	<main class="text_page">
+		<!-- Platzhalter: Text bitte anpassen -->
+		<p>Tripnjungle is Tom's web gallery: exhibitions of photos and videos from trips, nights out and everything in between.</p>
+		<p>Every exhibition has a theme, a front page and a short intro video. Upcoming exhibitions are listed under Events, past ones in the Archive.</p>
+		<p>Contact: <a href="mailto:hello@example.com">hello@example.com</a></p>
+	</main>
+
+	<footer class="site_footer">
+		<nav aria-label="Footer">
+			<a href="/">Home</a>
+			<a href="/exhibitions">Exhibitions</a>
+			<a href="/events">Events</a>
+			<a href="/archive">Archive</a>
+		</nav>
+	</footer>
+
+	<script defer src="/js/data.js"></script>
+	<script defer src="/js/nav.js"></script>
+	<script defer src="/js/intro.js"></script>
+</body>
+</html>

@@ -4,20 +4,24 @@
 //
 // Die Daten kommen aus der Payload-API (/api/exhibitions), die von derselben
 // App ausgeliefert wird. Hier werden sie in die Form gebracht, die die
-// Seiten-Skripte erwarten (wie früher die JSON-Dateien):
+// Seiten-Skripte erwarten:
 //   id, titel, theme, description, date, time, location,
 //   locked (true/false), video (YouTube-URL oder -ID),
-//   posters [ {id, type, src, alt} ], front_page {type, src, alt}, medien [ {...} ]
+//   posters [ medium ], front_page medium, medien [ medium ]
+// Ein Medium: { id, type ("image"|"video"), src, alt, name, width, height,
+//               sizes: { thumb, medium, large } (je {url, width, height}) }
 //
 // Bei gesperrten Ausstellungen (locked: true) liefert die API ohne Login
 // weder Deckblatt noch Medien, und die Dateien sind nicht abrufbar.
 
 const API_PATH = "/api/exhibitions";
+const CACHE_PREFIX = "tj:exhibition:";
+const CACHE_TTL = 10 * 60 * 1000;   // 10 Minuten
 
 let exhibitionsCache = null;   // alle Ausstellungen, sobald einmal geladen
 
 function getExhibitionLink(exhibition) {
-  return "exhibition.html?id=" + encodeURIComponent(exhibition.id);
+  return "/exhibition/" + encodeURIComponent(exhibition.id);
 }
 
 // Nur ausdrücklich freigeschaltete Ausstellungen (locked: false) sind offen.
@@ -62,14 +66,13 @@ function parseDate(exhibition) {
 
     date = match && new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]));
 
-    // new Date() rechnet z. B. Monat 24 einfach um, das wäre ein falsches Datum
     if (date && (date.getMonth() !== Number(match[2]) - 1 || date.getDate() !== Number(match[3]))) {
       date = null;
     }
   }
 
   if (!date || Number.isNaN(date.getTime())) {
-    console.warn("Ungültiges Datum bei „" + exhibition.id + "“:", value);
+    console.warn("Invalid date for “" + exhibition.id + "”:", value);
     return null;
   }
 
@@ -112,12 +115,12 @@ function compareByDate(a, b) {
   return (parseDate(a) - parseDate(b)) || (getNumber(a) - getNumber(b));
 }
 
-// "2026-12-24" → "24. Dezember 2026"
+// "2026-12-24" → "24 December 2026"
 function formatDate(exhibition) {
   const date = parseDate(exhibition);
 
   return date
-    ? date.toLocaleDateString("de-DE", { day: "2-digit", month: "long", year: "numeric" })
+    ? date.toLocaleDateString("en-GB", { day: "numeric", month: "long", year: "numeric" })
     : "";
 }
 
@@ -133,21 +136,101 @@ function resolveFrontPage(exhibition) {
   const media = (exhibition.medien || []).find((item) => item.id === frontPageReference.id);
 
   if (!media) {
-    console.error("Deckblatt-Medium nicht gefunden: " + frontPageReference.id);
+    console.error("Front page medium not found: " + frontPageReference.id);
   }
 
   return { ...exhibition, front_page: media || null };
 }
 
+// ---------- Bilder in passender Größe ----------
+
+const SIZE_ORDER = ["thumb", "medium", "large"];
+
+// URL einer Größe, Fallback auf die nächstgrößere bzw. das Original
+function getImageUrl(media, size) {
+  if (!media) {
+    return "";
+  }
+
+  const start = Math.max(0, SIZE_ORDER.indexOf(size));
+
+  for (let index = start; index < SIZE_ORDER.length; index += 1) {
+    const candidate = media.sizes?.[SIZE_ORDER[index]];
+
+    if (candidate?.url) {
+      return candidate.url;
+    }
+  }
+
+  return media.src || "";
+}
+
+// Setzt src, srcset, sizes, width/height (kein Layout-Sprung) und decoding.
+//   size:  gewünschte Größe ("thumb" | "medium" | "large")
+//   sizes: HTML-Attribut "sizes" für responsive Auswahl, z. B. "(max-width: 600px) 100vw, 50vw"
+//   lazy:  true → loading="lazy"
+//   priority: true → fetchpriority="high" (erstes sichtbares Bild)
+function setImageSources(image, media, options = {}) {
+  const size = options.size || "medium";
+  const chosen = media.sizes?.[size];
+
+  image.src = getImageUrl(media, size);
+
+  const candidates = SIZE_ORDER
+    .map((name) => media.sizes?.[name])
+    .filter((entry) => entry?.url && entry.width);
+
+  if (candidates.length > 1) {
+    image.srcset = candidates.map((entry) => entry.url + " " + entry.width + "w").join(", ");
+    image.sizes = options.sizes || "100vw";
+  }
+
+  const width = chosen?.width || media.width;
+  const height = chosen?.height || media.height;
+
+  if (width && height) {
+    image.width = width;
+    image.height = height;
+  }
+
+  image.decoding = "async";
+
+  if (options.lazy) {
+    image.loading = "lazy";
+  }
+
+  if (options.priority) {
+    image.setAttribute("fetchpriority", "high");
+  }
+
+  return image;
+}
+
+// Bilder einer Ausstellung schon mal in den Browser-Cache holen
+// (Deckblatt + die ersten Medien), z. B. während das Intro-Video läuft
+function preloadExhibitionImages(exhibition, count = 6) {
+  const items = [exhibition.front_page, ...(exhibition.medien || [])]
+    .filter((item) => item && item.type === "image")
+    .slice(0, count + 1);
+
+  items.forEach((item) => {
+    const image = new Image();
+
+    image.decoding = "async";
+    image.src = getImageUrl(item, "medium");
+  });
+}
+
 // Poster als Element:
 //   gesperrt            → <div class="poster_locked"><img></div>, kein Link
-//   mit Intro-Video     → <a data-intro> (intro.js öffnet das Overlay)
+//   mit Intro-Video     → <a data-intro data-id> (intro.js öffnet das Overlay)
 //   ohne Video          → <a> direkt zur Ausstellung
-function createPosterElement(exhibition, poster, altText) {
+// options: { altText, size, sizes, lazy, priority } wie setImageSources
+function createPosterElement(exhibition, poster, options = {}) {
   const image = document.createElement("img");
 
-  image.src = poster.src;
-  image.alt = poster.alt || altText || "Poster: " + exhibition.titel;
+  setImageSources(image, poster, { size: "medium", ...options });
+  image.alt = poster.alt || options.altText || "Poster: " + exhibition.titel;
 
   let wrapper;
 
@@ -157,6 +240,7 @@ function createPosterElement(exhibition, poster, altText) {
   } else {
     wrapper = document.createElement("a");
     wrapper.href = getExhibitionLink(exhibition);
+    wrapper.dataset.id = exhibition.id;
 
     if (getYouTubeId(exhibition.video)) {
       wrapper.dataset.intro = "true";
@@ -167,6 +251,8 @@ function createPosterElement(exhibition, poster, altText) {
 
   return wrapper;
 }
+
+// ---------- Laden ----------
 
 // Nur einfache ids erlauben
 function isValidId(id) {
@@ -183,13 +269,21 @@ async function fetchJson(path) {
   return response.json();
 }
 
-// ---------- API → Seitenformat ----------
-
-// Ein Medium aus der API (Upload-Dokument) → {id, type, src, alt, name}
+// Ein Medium aus der API (Upload-Dokument) → Seitenformat
 function mapMedia(media, name) {
   if (!media || typeof media !== "object" || !media.url) {
     return null;
   }
+
+  const sizes = {};
+
+  SIZE_ORDER.forEach((sizeName) => {
+    const entry = media.sizes?.[sizeName];
+
+    if (entry?.url) {
+      sizes[sizeName] = { url: entry.url, width: entry.width, height: entry.height };
+    }
+  });
 
   return {
     id: String(media.id),
@@ -197,6 +291,9 @@ function mapMedia(media, name) {
     src: media.url,
     alt: media.alt || "",
     name: name || media.name || "",
+    width: media.width,
+    height: media.height,
+    sizes,
   };
 }
 
@@ -219,10 +316,44 @@ function mapExhibition(doc) {
   };
 }
 
-// Eine einzelne Ausstellung über ihre id (= slug)
+// Kurzzeit-Cache im sessionStorage: intro.js legt die Ausstellung während des
+// Videos ab, exhibition.js rendert sie dann ohne Wartezeit
+function readCachedExhibition(id) {
+  try {
+    const raw = sessionStorage.getItem(CACHE_PREFIX + id);
+    const entry = raw && JSON.parse(raw);
+
+    if (entry && Date.now() - entry.time < CACHE_TTL) {
+      return entry.data;
+    }
+  } catch (error) {
+    // sessionStorage nicht verfügbar (privater Modus o. ä.) – einfach ohne Cache
+  }
+
+  return null;
+}
+
+function cacheExhibition(exhibition) {
+  try {
+    sessionStorage.setItem(
+      CACHE_PREFIX + exhibition.id,
+      JSON.stringify({ time: Date.now(), data: exhibition })
+    );
+  } catch (error) {
+    // voll oder nicht verfügbar – ignorieren
+  }
+}
+
+// Eine einzelne Ausstellung über ihre id (= slug), zuerst aus dem Kurzzeit-Cache
 async function loadExhibition(id) {
   if (!isValidId(id)) {
-    throw new Error("Ungültige id: " + id);
+    throw new Error("Invalid id: " + id);
+  }
+
+  const cached = readCachedExhibition(id);
+
+  if (cached) {
+    return cached;
   }
 
   const result = await fetchJson(
@@ -230,10 +361,14 @@ async function loadExhibition(id) {
   );
 
   if (!result.docs?.length) {
-    throw new Error("Nicht gefunden: " + id);
+    throw new Error("Not found: " + id);
   }
 
-  return mapExhibition(result.docs[0]);
+  const exhibition = mapExhibition(result.docs[0]);
+
+  cacheExhibition(exhibition);
+
+  return exhibition;
 }
 
 // Alle Ausstellungen, nach Datum sortiert

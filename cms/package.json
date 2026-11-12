@@ -12,6 +12,7 @@
     "generate:importmap": "cross-env NODE_OPTIONS=--no-deprecation payload generate:importmap",
     "generate:types": "cross-env NODE_OPTIONS=--no-deprecation payload generate:types",
     "import:json": "cross-env NODE_OPTIONS=--no-deprecation tsx --env-file=.env scripts/import-json.ts",
+    "media:regenerate": "cross-env NODE_OPTIONS=--no-deprecation tsx --env-file=.env scripts/regenerate-sizes.ts",
     "payload": "cross-env NODE_OPTIONS=--no-deprecation payload",
     "start": "cross-env NODE_OPTIONS=--no-deprecation next start"
   },

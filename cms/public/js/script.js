@@ -1,7 +1,8 @@
 // Startseite. Die Ausstellungen werden über data.js geladen:
 // jede freigeschaltete Ausstellung ist ein Slide mit ihrem Deckblatt.
-// Gibt es eine kommende Ausstellung mit Poster, steht ihr Poster über der Slideshow.
-// Klicks auf Poster/Slides fängt intro.js ab (Intro-Video vor der Ausstellung).
+// Gibt es eine kommende Ausstellung mit Poster, steht ihr Poster über der
+// Slideshow, alle weiteren kommenden Poster darunter.
+// Klicks auf Poster mit Video fängt intro.js ab, Slides führen direkt zur Ausstellung.
 let slides = [];
 
 let currentSlide = 0;
@@ -28,7 +29,11 @@ function showSlide(index) {
 
     const image = document.createElement("img");
 
-    image.src = front_page.src;
+    setImageSources(image, front_page, {
+      size: "medium",
+      sizes: "(max-width: 600px) 100vw, min(1200px, 90vw)",
+      priority: index === 0,
+    });
     image.alt = front_page.alt || exhibition.titel;
 
     anchor.appendChild(image);
@@ -58,7 +63,7 @@ function showSlide(index) {
   const titleLink = document.createElement("a");
   titleLink.href = link;
   titleLink.className = "slide_link";
-  titleLink.textContent = exhibition.titel + " – zur Ausstellung ›";
+  titleLink.textContent = exhibition.titel + " – view exhibition ›";
   slideContent.appendChild(titleLink);
 
   updateDots();
@@ -179,8 +184,15 @@ function findNextExhibition(exhibitions) {
 
 // Das Poster nimmt den Platz der Slideshow ein, die Slideshow rutscht
 // darunter. Die Seite passt dann nicht mehr auf einen Bildschirm und scrollt.
+// Das Poster ist das wichtigste Bild der Seite: große Version, hohe Priorität.
 function showPoster(exhibition) {
-  posterContainer.appendChild(createPosterElement(exhibition, exhibition.posters[0]));
+  posterContainer.appendChild(
+    createPosterElement(exhibition, exhibition.posters[0], {
+      size: "large",
+      sizes: "(max-width: 600px) 100vw, min(100vw, 70vh)",
+      priority: true,
+    })
+  );
   posterContainer.hidden = false;
   document.documentElement.classList.replace("fit", "has_poster");
 }
@@ -200,10 +212,13 @@ function showUpcomingPosters(exhibitions, shownPoster) {
         return;
       }
 
-      const element = createPosterElement(exhibition, poster);
+      const element = createPosterElement(exhibition, poster, {
+        size: "medium",
+        sizes: "(max-width: 600px) 100vw, 25vw",
+        lazy: true,
+      });
       const caption = document.createElement("p");
 
-      element.querySelector("img").loading = "lazy";
       caption.className = "upcoming_caption";
       caption.textContent = exhibition.titel + " · " + formatDate(exhibition);
 
@@ -223,13 +238,13 @@ async function start() {
   try {
     exhibitions = await loadExhibitions();
   } catch (error) {
-    slideContent.textContent = "Ausstellungen konnten nicht geladen werden.";
+    slideContent.textContent = "Exhibitions could not be loaded.";
     console.error(error);
     return;
   }
 
   if (exhibitions.length === 0) {
-    slideContent.textContent = "Noch keine Ausstellungen vorhanden.";
+    slideContent.textContent = "No exhibitions yet.";
     return;
   }
 
@@ -249,7 +264,7 @@ async function start() {
     .map(resolveFrontPage);
 
   if (slides.length === 0) {
-    slideContent.textContent = "Noch keine Ausstellungen freigeschaltet.";
+    slideContent.textContent = "No exhibitions available yet.";
     return;
   }
 

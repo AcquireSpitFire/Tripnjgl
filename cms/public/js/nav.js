@@ -3,11 +3,11 @@
 // nur an einer Stelle gepflegt wird und auf jeder Seite gleich ist.
 
 const MENU_ITEMS = [
-  { label: "Startseite", href: "index.html" },
-  { label: "Exhibitions", href: "exhibitions.html" },
-  { label: "Events", href: "events.html" },
-  { label: "Archive", href: "archive.html" },
-  { label: "About", href: "about.html" },
+  { label: "Home", href: "/" },
+  { label: "Exhibitions", href: "/exhibitions" },
+  { label: "Events", href: "/events" },
+  { label: "Archive", href: "/archive" },
+  { label: "About", href: "/about" },
 ];
 
 function setupMenu() {
@@ -22,7 +22,7 @@ function setupMenu() {
 
   toggle.className = "menu_toggle";
   toggle.type = "button";
-  toggle.setAttribute("aria-label", "Menü");
+  toggle.setAttribute("aria-label", "Menu");
   toggle.setAttribute("aria-expanded", "false");
   toggle.setAttribute("aria-controls", "menu");
   toggle.innerHTML = "<span></span><span></span><span></span>";
@@ -32,10 +32,11 @@ function setupMenu() {
 
   menu.id = "menu";
   menu.className = "menu";
+  menu.setAttribute("aria-label", "Main navigation");
   menu.hidden = true;
 
-  // Aktuelle Seite: "index.html" oder "" (bei /) → Startseite
-  const currentPage = location.pathname.split("/").pop() || "index.html";
+  // Aktuelle Seite: "/" oder "/exhibitions" … (ohne .html, ohne Query)
+  const currentPath = location.pathname.replace(/\.html$/, "").replace(/\/$/, "") || "/";
 
   MENU_ITEMS.forEach((item) => {
     const entry = document.createElement("li");
@@ -44,7 +45,7 @@ function setupMenu() {
     link.href = item.href;
     link.textContent = item.label;
 
-    if (item.href === currentPage) {
+    if (item.href === currentPath) {
       link.setAttribute("aria-current", "page");
     }
 

@@ -3,9 +3,14 @@
 // Nur Links mit data-intro (Poster, siehe createPosterElement in data.js)
 // werden abgefangen. Statt direkt zur Ausstellung zu springen, öffnet sich
 // ein Overlay mit dem YouTube-Video der Ausstellung (Feld "video").
-// Darunter steht der Knopf „Weiter zur Ausstellung“. Ist das Video zu Ende,
+// Darunter steht der Knopf „Continue to exhibition“. Ist das Video zu Ende,
 // geht es automatisch weiter. Slides, Karten und Textlinks führen direkt
 // zur Ausstellung.
+//
+// Schnell: Die YouTube-API wird schon im Leerlauf nach dem Seitenaufbau
+// (bzw. beim Berühren eines Posters) geladen. Während das Video läuft,
+// werden die Daten und ersten Bilder der Ausstellung vorgeladen, sodass die
+// Ausstellungsseite danach sofort da ist.
 //
 // Warum ein Overlay und keine eigene Seite: Browser erlauben Autoplay mit
 // Ton nur nach einem Klick auf derselben Seite. Der Klick auf das Poster
@@ -18,6 +23,7 @@
   let overlayElement = null;
   let player = null;
   let apiPromise = null;
+  const prefetched = new Set();
 
   // YouTube IFrame Player API einmalig nachladen
   function loadYouTubeApi() {
@@ -37,11 +43,60 @@
         const script = document.createElement("script");
 
         script.src = "https://www.youtube.com/iframe_api";
+        script.async = true;
         document.head.appendChild(script);
       });
     }
 
     return apiPromise;
+  }
+
+  // API im Leerlauf vorladen, sobald die Seite Poster mit Video enthält.
+  // Poster entstehen erst nach dem API-Aufruf, deshalb per MutationObserver.
+  function warmUpWhenPostersAppear() {
+    const start = () => {
+      const idle = window.requestIdleCallback || ((callback) => setTimeout(callback, 1500));
+
+      idle(() => loadYouTubeApi());
+    };
+
+    if (document.querySelector("a[data-intro]")) {
+      start();
+      return;
+    }
+
+    const observer = new MutationObserver(() => {
+      if (document.querySelector("a[data-intro]")) {
+        observer.disconnect();
+        start();
+      }
+    });
+
+    observer.observe(document.body, { childList: true, subtree: true });
+  }
+
+  // Ausstellung im Hintergrund holen: Daten in den sessionStorage,
+  // erste Bilder in den Browser-Cache, Seite per prefetch
+  async function prefetchExhibition(exhibition) {
+    if (prefetched.has(exhibition.id) || isLocked(exhibition)) {
+      return;
+    }
+
+    prefetched.add(exhibition.id);
+
+    const link = document.createElement("link");
+
+    link.rel = "prefetch";
+    link.href = getExhibitionLink(exhibition);
+    document.head.appendChild(link);
+
+    try {
+      const full = await loadExhibition(exhibition.id);
+
+      preloadExhibitionImages(full, 6);
+    } catch (error) {
+      console.warn("Prefetch failed for “" + exhibition.id + "”", error);
+    }
   }
 
   function closeIntro() {
@@ -76,7 +131,7 @@
 
     close.className = "intro_close";
     close.type = "button";
-    close.setAttribute("aria-label", "Schließen");
+    close.setAttribute("aria-label", "Close");
     close.textContent = "×";
     close.addEventListener("click", closeIntro);
 
@@ -108,15 +163,14 @@
       const note = document.createElement("p");
 
       note.className = "intro_locked";
-      note.textContent = "Diese Ausstellung ist noch nicht freigeschaltet.";
+      note.textContent = "This exhibition is not available yet.";
       actions.appendChild(note);
     } else {
       const button = document.createElement("button");
 
       button.className = "intro_button";
       button.type = "button";
-      button.textContent = "Weiter zur Ausstellung ›";
-      // Overlay schließen und zur Ausstellung wechseln
+      button.textContent = "Continue to exhibition ›";
       button.addEventListener("click", () => {
         closeIntro();
         goToExhibition(exhibition);
@@ -154,7 +208,6 @@
       vq: "hd1080",
     };
 
-    // "origin" schützt die API-Verbindung, geht aber nur bei http(s)
     if (/^https?:$/.test(location.protocol)) {
       playerVars.origin = location.origin;
     }
@@ -169,9 +222,10 @@
         onReady: (event) => {
           event.target.setPlaybackQuality("hd1080");
           event.target.playVideo();
+          // Während das Video läuft: Ausstellung schon laden
+          prefetchExhibition(exhibition);
         },
         onStateChange: (event) => {
-          // Video zu Ende → weiter zur Ausstellung (nur wenn freigeschaltet)
           if (event.data === YT.PlayerState.ENDED && !isLocked(exhibition)) {
             goToExhibition(exhibition);
           }
@@ -185,7 +239,7 @@
 
   // YouTube konnte das Video nicht abspielen: Grund statt schwarzem Feld anzeigen.
   // Codes: 2 = ungültige ID, 5 = Player-Fehler, 100 = nicht gefunden/privat,
-  // 101/150 = Einbetten vom Besitzer nicht erlaubt, 153 = Einbettung ohne Referrer
+  // 101/150 = Einbetten vom Besitzer nicht erlaubt
   function showPlayerError(code) {
     const box = overlayElement?.querySelector(".intro_player_box");
 
@@ -194,22 +248,21 @@
     }
 
     const reasons = {
-      2: "Die Video-ID ist ungültig.",
-      100: "Das Video wurde nicht gefunden oder ist privat.",
-      101: "Der Besitzer erlaubt das Einbetten dieses Videos nicht (YouTube Studio → Video → „Einbetten zulassen“).",
-      150: "Der Besitzer erlaubt das Einbetten dieses Videos nicht (YouTube Studio → Video → „Einbetten zulassen“).",
+      2: "The video ID is invalid.",
+      100: "The video was not found or is private.",
+      101: "The owner does not allow embedding this video (YouTube Studio → video → “Allow embedding”).",
+      150: "The owner does not allow embedding this video (YouTube Studio → video → “Allow embedding”).",
     };
 
     const message = document.createElement("p");
 
     message.className = "intro_error";
     message.textContent =
-      "Video kann nicht abgespielt werden (YouTube-Fehler " + code + "). " +
-      (reasons[code] || "");
+      "The video cannot be played (YouTube error " + code + "). " + (reasons[code] || "");
 
     box.innerHTML = "";
     box.appendChild(message);
-    console.error("YouTube-Fehler", code, "bei Video der Ausstellung");
+    console.error("YouTube error", code);
   }
 
   async function openIntro(id) {
@@ -218,8 +271,8 @@
     try {
       exhibition = await getExhibition(id);
     } catch (error) {
-      console.error("Ausstellung „" + id + "“ konnte nicht geladen werden.", error);
-      location.href = "exhibition.html?id=" + encodeURIComponent(id);
+      console.error("Exhibition “" + id + "” could not be loaded.", error);
+      location.href = "/exhibition/" + encodeURIComponent(id);
       return;
     }
 
@@ -229,10 +282,6 @@
     if (!videoId && !isLocked(exhibition)) {
       goToExhibition(exhibition);
       return;
-    }
-
-    if (!videoId && exhibition.video) {
-      console.warn("Keine YouTube-ID erkannt bei „" + id + "“:", exhibition.video);
     }
 
     closeIntro();
@@ -257,12 +306,11 @@
 
     const anchor = event.target.closest?.("a[data-intro]");
 
-    // Links innerhalb des Overlays nicht erneut abfangen
     if (!anchor || anchor.closest("#intro")) {
       return;
     }
 
-    const id = new URL(anchor.href, location.href).searchParams.get("id");
+    const id = anchor.dataset.id;
 
     if (!id) {
       return;
@@ -272,9 +320,24 @@
     openIntro(id);
   });
 
+  // Zeigt die Maus auf ein Poster (oder Finger berührt es): API jetzt laden
+  ["pointerenter", "touchstart", "focusin"].forEach((type) => {
+    document.addEventListener(
+      type,
+      (event) => {
+        if (event.target.closest?.("a[data-intro]")) {
+          loadYouTubeApi();
+        }
+      },
+      { capture: true, passive: true }
+    );
+  });
+
   document.addEventListener("keydown", (event) => {
     if (event.key === "Escape") {
       closeIntro();
     }
   });
+
+  warmUpWhenPostersAppear();
 })();

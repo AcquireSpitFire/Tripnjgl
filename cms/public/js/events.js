@@ -11,7 +11,7 @@
 const listElement = document.getElementById("list");
 const isArchive = document.body.dataset.page === "archive";
 
-function createPosters(exhibition) {
+function createPosters(exhibition, eventIndex) {
   const posters = document.createElement("div");
 
   posters.className = "event_posters";
@@ -21,27 +21,28 @@ function createPosters(exhibition) {
       return;
     }
 
-    const element = createPosterElement(
-      exhibition,
-      poster,
-      "Poster " + (index + 1) + ": " + exhibition.titel
-    );
+    const element = createPosterElement(exhibition, poster, {
+      altText: "Poster " + (index + 1) + ": " + exhibition.titel,
+      size: "medium",
+      sizes: "(max-width: 600px) 100vw, 24rem",
+      lazy: eventIndex > 0 || index > 0,
+      priority: eventIndex === 0 && index === 0,
+    });
 
-    element.querySelector("img").loading = "lazy";
     posters.appendChild(element);
   });
 
   return posters;
 }
 
-function createEvent(exhibition) {
+function createEvent(exhibition, eventIndex) {
   const article = document.createElement("article");
 
   article.className = "event";
   article.id = exhibition.id;
 
   if (exhibition.posters?.length) {
-    article.appendChild(createPosters(exhibition));
+    article.appendChild(createPosters(exhibition, eventIndex));
   }
 
   const info = document.createElement("div");
@@ -67,7 +68,7 @@ function createEvent(exhibition) {
 
   if (!isArchive) {
     if (exhibition.time) {
-      details.push(exhibition.time + " Uhr");
+      details.push(exhibition.time);
     }
 
     if (exhibition.location) {
@@ -93,14 +94,14 @@ function createEvent(exhibition) {
     const note = document.createElement("p");
 
     note.className = "event_locked";
-    note.textContent = "Noch nicht freigeschaltet";
+    note.textContent = "Not available yet";
     info.appendChild(note);
   } else {
     const link = document.createElement("a");
 
     link.className = "event_link";
     link.href = getExhibitionLink(exhibition);
-    link.textContent = "Zur Ausstellung ›";
+    link.textContent = "View exhibition ›";
     info.appendChild(link);
   }
 
@@ -115,7 +116,7 @@ async function startEvents() {
   try {
     exhibitions = await loadExhibitions();
   } catch (error) {
-    listElement.textContent = "Ausstellungen konnten nicht geladen werden.";
+    listElement.textContent = "Exhibitions could not be loaded.";
     console.error(error);
     return;
   }
@@ -126,12 +127,12 @@ async function startEvents() {
     : exhibitions.filter((exhibition) => isUpcoming(exhibition, today)).sort(compareByDate);
 
   if (selected.length === 0) {
-    listElement.textContent = isArchive ? "Noch nichts im Archiv." : "Keine kommenden Events.";
+    listElement.textContent = isArchive ? "Nothing in the archive yet." : "No upcoming events.";
     return;
   }
 
-  selected.forEach((exhibition) => {
-    listElement.appendChild(createEvent(exhibition));
+  selected.forEach((exhibition, index) => {
+    listElement.appendChild(createEvent(exhibition, index));
   });
 }
 

@@ -171,7 +171,7 @@ export interface Exhibition {
 export interface Media {
   id: number;
   /**
-   * Kurze Bildbeschreibung (Barrierefreiheit).
+   * Kurze Bildbeschreibung (Barrierefreiheit, SEO).
    */
   alt?: string | null;
   name?: string | null;
@@ -192,6 +192,22 @@ export interface Media {
   focalY?: number | null;
   sizes?: {
     thumb?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    medium?: {
+      url?: string | null;
+      width?: number | null;
+      height?: number | null;
+      mimeType?: string | null;
+      filesize?: number | null;
+      filename?: string | null;
+    };
+    large?: {
       url?: string | null;
       width?: number | null;
       height?: number | null;
@@ -354,6 +370,26 @@ export interface MediaSelect<T extends boolean = true> {
     | T
     | {
         thumb?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        medium?:
+          | T
+          | {
+              url?: T;
+              width?: T;
+              height?: T;
+              mimeType?: T;
+              filesize?: T;
+              filename?: T;
+            };
+        large?:
           | T
           | {
               url?: T;

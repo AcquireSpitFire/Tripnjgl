@@ -14,9 +14,32 @@ const nextConfig: NextConfig = {
       },
     ],
   },
-  // Das statische Frontend liegt in public/. "/" zeigt auf public/index.html.
-  async rewrites() {
-    return [{ source: '/', destination: '/index.html' }]
+  // Die Seiten liegen als Vorlagen in src/templates und werden von Route Handlern
+  // (src/app/**/route.ts) mit Meta-Daten ausgeliefert; public/ enthält nur CSS, JS, Bilder.
+  async redirects() {
+    return [
+      // Alte Links weiterleiten (/exhibition.html?id=… erledigt src/app/exhibition.html/route.ts)
+      { source: '/events.html', destination: '/events', permanent: true },
+      { source: '/exhibitions.html', destination: '/exhibitions', permanent: true },
+      { source: '/archive.html', destination: '/archive', permanent: true },
+      { source: '/about.html', destination: '/about', permanent: true },
+      { source: '/index.html', destination: '/', permanent: true },
+    ]
+  },
+  async headers() {
+    return [
+      {
+        // Mediendateien ändern sich unter einer URL nicht (neue Datei = neuer Name)
+        source: '/api/media/file/:path*',
+        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
+      },
+      {
+        source: '/:path(css|js)/:file*',
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=3600, stale-while-revalidate=86400' },
+        ],
+      },
+    ]
   },
   webpack: (webpackConfig) => {
     webpackConfig.resolve.extensionAlias = {

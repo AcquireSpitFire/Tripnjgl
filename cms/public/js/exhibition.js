@@ -1,11 +1,13 @@
 // Zeigt eine Ausstellung an. Welche, steht in der URL:
-// exhibition.html?id=exhibition-1  →  lädt data/exhibitions/exhibition-1.json
+// /exhibition/exhibition-1  →  Ausstellung mit slug "exhibition-1"
+// (alte Form exhibition.html?id=… wird vom Server weitergeleitet).
 //
 // Oben: Slideshow mit Deckblatt + allen Bildern/Videos.
-// Darunter: Beschreibung, Intro-Video (zum erneuten Anschauen) und die
-// Galerie mit allen Bildern/Videos
-// (Handy: untereinander, Desktop: seitlich scrollbares Band).
+// Darunter: Beschreibung, Galerie mit allen Bildern/Videos
+// (Handy: untereinander, Desktop: seitlich scrollbares Band) und ganz
+// unten das Intro-Video zum erneuten Anschauen.
 // Gesperrte Ausstellungen (locked: true) zeigen nur einen Hinweis.
+// Die Daten kommen aus dem sessionStorage (von intro.js vorgeladen) oder der API.
 
 const titelElement = document.getElementById("titel");
 const themeElement = document.getElementById("theme");
@@ -26,7 +28,7 @@ function getName(item) {
   return item.name || item.alt || "";
 }
 
-function createMedia(item) {
+function createMedia(item, options = {}) {
   if (item.type === "video") {
     const video = document.createElement("video");
 
@@ -40,9 +42,13 @@ function createMedia(item) {
 
   const image = document.createElement("img");
 
-  image.src = item.src;
+  setImageSources(image, item, {
+    size: "medium",
+    sizes: "(max-width: 600px) 100vw, min(1200px, 90vw)",
+    lazy: true,
+    ...options,
+  });
   image.alt = item.alt || "";
-  image.loading = "lazy";
 
   return image;
 }
@@ -67,9 +73,9 @@ function showSlide(index) {
     video.addEventListener("ended", nextSlide);
     slideContent.appendChild(video);
   } else {
-    const image = createMedia(item);
+    // das sichtbare Bild sofort laden
+    const image = createMedia(item, { lazy: false, priority: index === 0 });
 
-    image.loading = "eager";   // das sichtbare Bild sofort laden
     slideContent.appendChild(image);
     startTimer(5000);
   }
@@ -153,7 +159,7 @@ function updateDots() {
     const dot = document.createElement("button");
 
     dot.className = "dot";
-    dot.setAttribute("aria-label", `Bild ${index + 1}`);
+    dot.setAttribute("aria-label", `Image ${index + 1}`);
 
     if (index === currentSlide) {
       dot.classList.add("active");
@@ -204,7 +210,9 @@ function setupGalerie(exhibition) {
     const figure = document.createElement("figure");
     const name = getName(item);
 
-    figure.appendChild(createMedia(item));
+    figure.appendChild(
+      createMedia(item, { sizes: "(max-width: 600px) 100vw, 480px" })
+    );
 
     if (name) {
       const caption = document.createElement("figcaption");
@@ -214,9 +222,9 @@ function setupGalerie(exhibition) {
       figure.appendChild(caption);
     }
 
-    // Jedes Foto/Video hat eine id, z. B. für Links wie exhibition.html?id=...#exhibition-1-2
+    // Jedes Foto/Video hat eine id, z. B. für Links wie /exhibition/…#123
     if (item.id) {
-      figure.id = item.id;
+      figure.id = "media-" + item.id;
     }
 
     galerieElement.appendChild(figure);
@@ -249,17 +257,37 @@ function setupGalerie(exhibition) {
 }
 
 // ---------- Vollbild ----------
-// Klick auf ein Bild (Slideshow oder Galerie) zeigt es bildschirmfüllend.
-// Schließen: Klick irgendwo, Esc-Taste oder ×.
+// Klick auf ein Bild (Slideshow oder Galerie) zeigt es bildschirmfüllend
+// in der großen Version (2560 px). Schließen: Klick irgendwo, Esc-Taste oder ×.
 // Videos haben ihren eigenen Vollbild-Knopf in der Video-Steuerung.
 
 const viewerElement = document.getElementById("viewer");
 const viewerImage = document.getElementById("viewer_image");
 
+// Welches Medium steckt hinter einem <img>? (über die URL der mittleren Größe)
+function findMediaForImage(image, exhibition) {
+  const all = [exhibition.front_page, ...(exhibition.medien || [])].filter(Boolean);
+
+  return all.find((item) => image.currentSrc === item.src || image.src === item.src
+    || Object.values(item.sizes || {}).some((size) => size.url === image.currentSrc || size.url === image.src));
+}
+
+let currentExhibition = null;
+
 function openViewer(image) {
   clearTimeout(timer);   // Slideshow anhalten, solange das Bild offen ist
 
-  viewerImage.src = image.src;
+  const media = currentExhibition && findMediaForImage(image, currentExhibition);
+
+  viewerImage.removeAttribute("srcset");
+  viewerImage.removeAttribute("sizes");
+
+  if (media) {
+    setImageSources(viewerImage, media, { size: "large", sizes: "100vw" });
+  } else {
+    viewerImage.src = image.src;
+  }
+
   viewerImage.alt = image.alt;
   viewerElement.hidden = false;
   document.documentElement.classList.add("viewer_open");
@@ -317,7 +345,7 @@ function setupViewer() {
 // ---------- Laden ----------
 
 function showError(message) {
-  titelElement.textContent = "exhibition not found";
+  titelElement.textContent = "Exhibition not found";
   descriptionElement.textContent = message;
   slideshowElement.hidden = true;
 }
@@ -328,11 +356,11 @@ function showLocked(exhibition) {
 
   titelElement.textContent = exhibition.titel;
   themeElement.textContent = exhibition.theme || "";
-  descriptionElement.textContent = "Diese Ausstellung ist noch nicht freigeschaltet.";
+  descriptionElement.textContent = "This exhibition is not available yet.";
   slideshowElement.hidden = true;
 }
 
-// Intro-Video der Ausstellung unter der Beschreibung einbetten
+// Intro-Video der Ausstellung unter der Galerie einbetten
 function setupVideo(exhibition) {
   const videoId = getYouTubeId(exhibition.video);
 
@@ -353,35 +381,47 @@ function setupVideo(exhibition) {
 }
 
 function showExhibition(exhibition) {
+  currentExhibition = exhibition;
+
   if (isLocked(exhibition)) {
     showLocked(exhibition);
     return;
   }
 
-  document.title = exhibition.titel + " – Tripnjungle";
-
+  // Titel/Meta hat der Server schon gesetzt; hier nur den sichtbaren Inhalt
   titelElement.textContent = exhibition.titel;
   themeElement.textContent = exhibition.theme || "";
   descriptionElement.textContent = exhibition.description || "";
 
   setupSlideshow(exhibition);
-  setupVideo(exhibition);
   setupGalerie(exhibition);
+  setupVideo(exhibition);
   setupViewer();
 }
 
+// id aus /exhibition/<id>, Fallback ?id=… (alte Links)
+function getIdFromUrl() {
+  const match = /^\/exhibition\/([^/?#]+)/.exec(window.location.pathname);
+
+  if (match) {
+    return decodeURIComponent(match[1]);
+  }
+
+  return new URLSearchParams(window.location.search).get("id");
+}
+
 async function startExhibition() {
-  const id = new URLSearchParams(window.location.search).get("id");
+  const id = getIdFromUrl();
 
   if (!isValidId(id)) {
-    showError("Keine gültige Ausstellung angegeben.");
+    showError("No valid exhibition specified.");
     return;
   }
 
   try {
     showExhibition(await loadExhibition(id));
   } catch (error) {
-    showError("Die Ausstellung „" + id + "“ konnte nicht geladen werden.");
+    showError("The exhibition “" + id + "” could not be loaded.");
     console.error(error);
   }
 }

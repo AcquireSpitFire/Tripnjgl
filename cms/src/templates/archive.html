@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>{{title}}</title>
+	<meta name="description" content="{{description}}">
+	<meta name="robots" content="{{robots}}">
+	<link rel="canonical" href="{{canonical}}">
+	<meta property="og:site_name" content="{{siteName}}">
+	<meta property="og:type" content="website">
+	<meta property="og:title" content="{{title}}">
+	<meta property="og:description" content="{{description}}">
+	<meta property="og:url" content="{{canonical}}">
+	<meta property="og:image" content="{{ogImage}}">
+	<meta name="twitter:card" content="summary_large_image">
+	<meta name="twitter:title" content="{{title}}">
+	<meta name="twitter:description" content="{{description}}">
+	<meta name="twitter:image" content="{{ogImage}}">
+	<meta name="theme-color" content="#000000">
+	<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+	<link rel="manifest" href="/manifest.webmanifest">
+	<link rel="preconnect" href="https://www.youtube-nocookie.com">
+	<link rel="preconnect" href="https://www.youtube.com">
+	<link rel="preconnect" href="https://i.ytimg.com">
+	<link rel="stylesheet" href="/css/style.css">
+	{{{jsonLd}}}
+</head>
+<body data-page="archive">
+	<header>
+		<div class="header_inner">
+			<p class="site_name"><a href="/">Tripnjungle</a></p>
+			<h1 class="page_title">Archive</h1>
+		</div>
+	</header>
+
+	<main>
+		<!-- Poster aller vergangenen Ausstellungen -->
+		<div id="list" class="event_list"></div>
+	</main>
+
+	<footer class="site_footer">
+		<nav aria-label="Footer">
+			<a href="/">Home</a>
+			<a href="/exhibitions">Exhibitions</a>
+			<a href="/events">Events</a>
+			<a href="/about">About</a>
+		</nav>
+	</footer>
+
+	<script defer src="/js/data.js"></script>
+	<script defer src="/js/nav.js"></script>
+	<script defer src="/js/intro.js"></script>
+	<script defer src="/js/events.js"></script>
+</body>
+</html>

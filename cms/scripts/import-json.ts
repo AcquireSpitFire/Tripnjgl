@@ -76,9 +76,9 @@ async function run() {
     }
 
     // Jede Datei nur einmal hochladen, auch wenn sie mehrfach verwendet wird
-    const mediaIds = new Map<string, number | string>()
+    const mediaIds = new Map<string, number>()
 
-    async function upload(item: JsonMedia): Promise<number | string | null> {
+    async function upload(item: JsonMedia): Promise<number | null> {
       if (mediaIds.has(item.src)) {
         return mediaIds.get(item.src)!
       }
@@ -100,7 +100,7 @@ async function run() {
         filePath,
       })
 
-      mediaIds.set(item.src, created.id)
+      mediaIds.set(item.src, created.id as number)
       console.log(`  hochgeladen: ${item.src}`)
 
       return created.id
@@ -109,7 +109,7 @@ async function run() {
     console.log(`Importiere „${exhibition.id}“ …`)
 
     const posterList = exhibition.posters || (exhibition.poster ? [exhibition.poster] : [])
-    const posters: (number | string)[] = []
+    const posters: number[] = []
 
     for (const poster of posterList) {
       const id = await upload(poster)
@@ -119,7 +119,7 @@ async function run() {
       }
     }
 
-    const medien: { file: number | string; name?: string }[] = []
+    const medien: { file: number; name?: string }[] = []
 
     for (const item of exhibition.medien || []) {
       const id = await upload(item)

@@ -110,12 +110,52 @@ main {
   margin: 0 auto;
 }
 
-/* Untertitel im Header: Thema der Ausstellung oder Name der Seite */
+/* Markenname auf Unterseiten (sieht aus wie die h1 der Startseite) */
+.site_name {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 400;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--text);
+  line-height: 1.6;
+}
+
+.site_name a {
+  color: inherit;
+}
+
+/* Untertitel im Header: Thema der Ausstellung oder Name der Seite (h1 auf Unterseiten) */
 #theme,
 .page_title {
   margin: 0.25rem 0 0;
   font-size: 0.85rem;
+  font-weight: 400;
   letter-spacing: 0.1em;
+  text-transform: none;
+  color: var(--muted);
+}
+
+/* Fußzeile: Links für Besucher ohne Menü und für Suchmaschinen */
+.site_footer {
+  max-width: 1200px;
+  margin: 4rem auto 0;
+  padding-top: 1.5rem;
+  border-top: 1px solid #1a1a1a;
+}
+
+.site_footer nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1.5rem;
+  font-size: 0.8rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+}
+
+/* Startseite ohne Poster: feste Höhe, die Fußzeile würde den Platz stehlen */
+.fit .site_footer {
+  display: none;
 }
 
 /* Menü-Knopf: drei Striche rechts oben, offen ein × */
@@ -203,6 +243,7 @@ img,
 video {
   display: block;
   width: 100%;
+  height: auto;              /* width/height-Attribute nur fürs Seitenverhältnis, nicht als feste Höhe */
   aspect-ratio: var(--media-ratio);
   object-fit: contain;
   background: transparent;   /* kein Rahmen hinter dem Medium, nur der Seitenhintergrund */
