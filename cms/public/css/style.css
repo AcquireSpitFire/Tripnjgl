@@ -48,7 +48,7 @@ body {
   overflow-x: hidden;        /* zusätzlich am body, mobile Browser ignorieren es am html teilweise */
   overflow-x: clip;
   margin: 0;
-  padding: 2rem var(--page-pad);
+  padding: 0 var(--page-pad) 2rem;   /* der obere Rand sitzt im Header (sticky) */
   background: var(--bg);
   color: var(--text);
   font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -85,14 +85,114 @@ a:focus-visible {
 
 /* ---------- 3. Seitenaufbau ---------- */
 
+/* Der Header bleibt beim Scrollen oben stehen. Er reicht über die volle
+   Breite (negative Ränder gleichen den Seitenrand aus) und hat einen festen
+   Hintergrund, damit nichts durchscheint. Deshalb liegt der obere Seitenrand
+   (2rem) im Header statt am body; der Abstand nach unten (2rem) ebenso. */
 header {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  margin: 0 calc(-1 * var(--page-pad));
+  padding: 2rem var(--page-pad);
+  background: var(--bg);
+}
+
+.header_inner {
+  position: relative;
   max-width: 1200px;
-  margin: 0 auto 2rem;
+  margin: 0 auto;
+  padding-right: 3rem;       /* Platz für den Menü-Knopf rechts */
 }
 
 main {
   max-width: 1200px;
   margin: 0 auto;
+}
+
+/* Untertitel im Header: Thema der Ausstellung oder Name der Seite */
+#theme,
+.page_title {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+}
+
+/* Menü-Knopf: drei Striche rechts oben, offen ein × */
+
+.menu_toggle {
+  position: absolute;
+  top: 0;
+  right: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 5px;
+  width: 2.5rem;
+  height: 1.76rem;           /* Höhe der Titelzeile */
+  padding: 0;
+  border: 0;
+  background: none;
+  cursor: pointer;
+}
+
+.menu_toggle span {
+  display: block;
+  width: 22px;
+  height: 2px;
+  background: var(--muted);
+  transition: transform 0.2s, opacity 0.2s, background 0.2s;
+}
+
+.menu_toggle:hover span,
+.menu_toggle:focus-visible span {
+  background: var(--text);
+}
+
+.menu_toggle[aria-expanded="true"] span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.menu_toggle[aria-expanded="true"] span:nth-child(2) {
+  opacity: 0;
+}
+
+.menu_toggle[aria-expanded="true"] span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
+
+/* Menü: klappt unter dem Header auf, Einträge rechtsbündig */
+
+.menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  padding: 0.5rem var(--page-pad) 1.5rem;
+  background: var(--bg);
+  border-bottom: 1px solid #1a1a1a;
+}
+
+.menu ul {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 0.75rem;
+}
+
+.menu a {
+  font-size: 0.9rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+}
+
+.menu a[aria-current="page"] {
+  color: var(--text);
 }
 
 
@@ -131,7 +231,6 @@ video {
 }
 
 .fit header {
-  width: 100%;
   flex: none;
 }
 
@@ -302,16 +401,10 @@ video {
 
 /* ---------- 6. Ausstellung (exhibition.html) ---------- */
 
-header > a {
+.header_inner > a {
   display: inline-block;
   margin-bottom: 1.5rem;
   font-size: 0.85rem;
-}
-
-#theme {
-  margin: 0.25rem 0 0;
-  font-size: 0.85rem;
-  letter-spacing: 0.1em;
 }
 
 /* Breite eines Galeriebildes – die Slideshow ist genauso groß */
@@ -356,6 +449,33 @@ main {
 #description {
   max-width: 60ch;
   margin-bottom: 3rem;
+}
+
+/* Intro-Video der Ausstellung, zum erneuten Anschauen */
+.video_section {
+  margin-bottom: 3rem;
+}
+
+.section_title {
+  margin: 0 0 0.75rem;
+  font-size: 0.85rem;
+  font-weight: 400;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.video_box {
+  width: min(100%, 720px);
+  aspect-ratio: 16 / 9;
+  background: var(--frame);
+}
+
+.video_box iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
 }
 
 /* Galerie als Band: alle Bilder nebeneinander, das Band scrollt seitlich
@@ -403,7 +523,8 @@ main {
   background: none;
 }
 
-.viewer_close {
+.viewer_close,
+.intro_close {
   position: absolute;
   top: 0.5rem;
   right: 0.75rem;
@@ -419,14 +540,208 @@ main {
 }
 
 .viewer_close:hover,
-.viewer_close:focus-visible {
+.viewer_close:focus-visible,
+.intro_close:hover,
+.intro_close:focus-visible {
   color: var(--text);
 }
 
-/* Seite dahinter nicht scrollen, solange das Bild offen ist */
+/* Seite dahinter nicht scrollen, solange Bild oder Intro offen ist */
 .viewer_open,
-.viewer_open body {
+.viewer_open body,
+.intro_open,
+.intro_open body {
   overflow: hidden;
+}
+
+
+/* ---------- 6b. Intro-Video (Overlay vor der Ausstellung) ---------- */
+
+/* Overlay über der ganzen Seite: Video 16:9 mittig, darunter Titel und
+   der Knopf „Weiter zur Ausstellung“ (nur wenn freigeschaltet) */
+
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem var(--page-pad);
+  background: rgba(0, 0, 0, 0.96);
+}
+
+/* So breit, dass Video + Titel + Knopf in die Bildschirmhöhe passen */
+.intro_inner {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: min(100%, (100vh - 12rem) * 16 / 9);
+}
+
+.intro_player_box {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  background: var(--frame);
+}
+
+.intro_player_box iframe {
+  display: block;
+  width: 100%;
+  height: 100%;
+  border: 0;
+}
+
+.intro_title {
+  margin: 1rem 0 0.75rem;
+  font-size: 0.85rem;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--text);
+  text-align: center;
+}
+
+.intro_actions {
+  min-height: 2.5rem;
+  text-align: center;
+}
+
+.intro_button {
+  display: inline-block;
+  padding: 0.5rem 1.25rem;
+  border: 1px solid var(--muted);
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+  color: var(--text);
+  transition: border-color 0.2s;
+}
+
+.intro_button:hover,
+.intro_button:focus-visible {
+  border-color: var(--text);
+}
+
+.intro_locked {
+  margin: 0;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+}
+
+
+/* ---------- 6c. Listen (exhibitions.html, events.html, archive.html) ---------- */
+
+/* Exhibitions: Raster aus Karten mit Deckblatt, Titel, Thema */
+
+.card_grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 2rem var(--gap);
+}
+
+.card {
+  display: block;
+}
+
+.card img,
+.card video,
+.card_placeholder {
+  aspect-ratio: var(--media-ratio);
+  background: var(--frame);
+}
+
+.card_title {
+  margin: 0.75rem 0 0;
+  font-size: 0.9rem;
+  font-weight: 400;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  color: var(--text);
+  overflow-wrap: anywhere;
+}
+
+.card_theme {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+}
+
+/* Events / Archive: pro Ausstellung links die Poster, rechts die Details */
+
+.event_list {
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+}
+
+.event {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 2rem;
+  align-items: start;
+}
+
+.event_posters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--gap);
+}
+
+.event_posters a {
+  display: block;
+  flex: 1 1 14rem;
+  max-width: 24rem;
+}
+
+/* Poster hochkant, nichts abgeschnitten */
+.event_posters img {
+  width: 100%;
+  height: auto;
+  max-height: 36rem;
+  aspect-ratio: auto;
+  object-fit: contain;
+  object-position: left top;
+}
+
+.event_title {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 400;
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  overflow-wrap: anywhere;
+}
+
+.event_theme {
+  margin: 0.25rem 0 0;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+}
+
+.event_meta {
+  margin: 1rem 0;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.event_description {
+  max-width: 60ch;
+}
+
+.event_link,
+.event_locked {
+  display: inline-block;
+  margin: 0;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
+}
+
+.event_locked {
+  color: #555;
+}
+
+/* About: einfacher Text */
+.text_page p {
+  max-width: 60ch;
 }
 
 
@@ -476,6 +791,25 @@ main {
     padding-bottom: 0;
   }
 
+  /* Listen: eine Spalte */
+  .card_grid {
+    grid-template-columns: 1fr;
+  }
+
+  .event {
+    grid-template-columns: 1fr;
+    gap: 1rem;
+  }
+
+  .event_posters a {
+    max-width: none;
+  }
+
+  /* Intro: Video volle Breite */
+  .intro {
+    padding: 3rem 0;
+  }
+
 }
 
 
@@ -507,11 +841,12 @@ main {
 /* Weniger Abstände, damit das Bild größer ist */
 @media (max-height: 500px) {
   .fit body {
-    padding-block: 0.75rem;
+    padding-bottom: 0.75rem;
   }
 
   .fit header {
-    margin-bottom: 0.5rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.5rem;
   }
 
   .fit main > p {

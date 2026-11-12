@@ -2,8 +2,10 @@
 // exhibition.html?id=exhibition-1  →  lädt data/exhibitions/exhibition-1.json
 //
 // Oben: Slideshow mit Deckblatt + allen Bildern/Videos.
-// Darunter: Galerie mit allen Bildern/Videos
+// Darunter: Beschreibung, Intro-Video (zum erneuten Anschauen) und die
+// Galerie mit allen Bildern/Videos
 // (Handy: untereinander, Desktop: seitlich scrollbares Band).
+// Gesperrte Ausstellungen (locked: true) zeigen nur einen Hinweis.
 
 const titelElement = document.getElementById("titel");
 const themeElement = document.getElementById("theme");
@@ -12,6 +14,8 @@ const slideshowElement = document.getElementById("slideshow");
 const slideContent = document.getElementById("slide_content");
 const dotsContainer = document.getElementById("dots");
 const galerieElement = document.getElementById("galerie");
+const videoSection = document.getElementById("video");
+const videoBox = document.getElementById("video_box");
 
 let slides = [];
 let currentSlide = 0;
@@ -318,7 +322,42 @@ function showError(message) {
   slideshowElement.hidden = true;
 }
 
+// Gesperrte Ausstellung: Titel, aber keine Bilder
+function showLocked(exhibition) {
+  document.title = exhibition.titel + " – Tripnjungle";
+
+  titelElement.textContent = exhibition.titel;
+  themeElement.textContent = exhibition.theme || "";
+  descriptionElement.textContent = "Diese Ausstellung ist noch nicht freigeschaltet.";
+  slideshowElement.hidden = true;
+}
+
+// Intro-Video der Ausstellung unter der Beschreibung einbetten
+function setupVideo(exhibition) {
+  const videoId = getYouTubeId(exhibition.video);
+
+  if (!videoId) {
+    return;
+  }
+
+  const iframe = document.createElement("iframe");
+
+  iframe.src = "https://www.youtube-nocookie.com/embed/" + videoId + "?rel=0";
+  iframe.title = "Video: " + exhibition.titel;
+  iframe.allow = "autoplay; fullscreen; picture-in-picture";
+  iframe.allowFullscreen = true;
+  iframe.loading = "lazy";
+
+  videoBox.appendChild(iframe);
+  videoSection.hidden = false;
+}
+
 function showExhibition(exhibition) {
+  if (isLocked(exhibition)) {
+    showLocked(exhibition);
+    return;
+  }
+
   document.title = exhibition.titel + " – Tripnjungle";
 
   titelElement.textContent = exhibition.titel;
@@ -326,31 +365,25 @@ function showExhibition(exhibition) {
   descriptionElement.textContent = exhibition.description || "";
 
   setupSlideshow(exhibition);
+  setupVideo(exhibition);
   setupGalerie(exhibition);
   setupViewer();
 }
 
-async function loadExhibition() {
+async function startExhibition() {
   const id = new URLSearchParams(window.location.search).get("id");
 
-  // Nur einfache ids erlauben, damit niemand beliebige Pfade laden kann
-  if (!id || !/^[a-z0-9-]+$/i.test(id)) {
+  if (!isValidId(id)) {
     showError("Keine gültige Ausstellung angegeben.");
     return;
   }
 
   try {
-    const response = await fetch("data/exhibitions/" + id + ".json");
-
-    if (!response.ok) {
-      throw new Error("HTTP " + response.status);
-    }
-
-    showExhibition(await response.json());
+    showExhibition(await loadExhibition(id));
   } catch (error) {
     showError("Die Ausstellung „" + id + "“ konnte nicht geladen werden.");
     console.error(error);
   }
 }
 
-loadExhibition();
+startExhibition();

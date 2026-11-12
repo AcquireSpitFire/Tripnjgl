@@ -1,0 +1,60 @@
+import type { CollectionConfig } from 'payload'
+
+// Bilder, Videos und Poster.
+//
+// "locked" wird nicht von Hand gesetzt, sondern vom Hook der Ausstellungen:
+// Poster sind immer öffentlich, Deckblatt und Medien einer Ausstellung sind
+// genau dann öffentlich, wenn die Ausstellung freigeschaltet ist.
+// Ohne Login liefert die API (und die Datei-Route /api/media/file/…)
+// nur Medien mit locked: false. Neue Uploads sind gesperrt, bis eine
+// Ausstellung sie verwendet.
+export const Media: CollectionConfig = {
+  slug: 'media',
+  labels: {
+    singular: 'Medium',
+    plural: 'Medien',
+  },
+  admin: {
+    useAsTitle: 'filename',
+    defaultColumns: ['filename', 'alt', 'name', 'locked', 'updatedAt'],
+  },
+  access: {
+    read: ({ req }) => (req.user ? true : { locked: { equals: false } }),
+  },
+  upload: {
+    staticDir: 'media',
+    mimeTypes: ['image/*', 'video/*'],
+    imageSizes: [
+      {
+        name: 'thumb',
+        width: 600,
+        position: 'centre',
+      },
+    ],
+    adminThumbnail: 'thumb',
+  },
+  fields: [
+    {
+      name: 'alt',
+      label: 'Alt-Text',
+      type: 'text',
+      admin: {
+        description: 'Kurze Bildbeschreibung (Barrierefreiheit).',
+      },
+    },
+    {
+      name: 'name',
+      label: 'Name / Bildunterschrift',
+      type: 'text',
+    },
+    {
+      name: 'locked',
+      type: 'checkbox',
+      defaultValue: true,
+      admin: {
+        readOnly: true,
+        description: 'Wird automatisch von der Ausstellung gesetzt.',
+      },
+    },
+  ],
+}

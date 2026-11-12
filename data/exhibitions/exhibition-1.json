@@ -4,12 +4,18 @@
   "theme": "Wander Trip",
   "description": "Beschreibung der Ausstellung.",
   "date": "2026-12-24",
-  "poster": {
-    "id": "exhibition-1-poster",
-    "type": "poster",
-    "src": "data/image/poster/wanderTripPoster1.png",
-    "alt": "1"
-  },
+  "time": "19:00",
+  "location": "Ort folgt",
+  "locked": false,
+  "video": "https://www.youtube.com/watch?v=aqz-KE-bpKQ",
+  "posters": [
+    {
+      "id": "exhibition-1-poster-1",
+      "type": "poster",
+      "src": "data/image/poster/wanderTripPoster1.png",
+      "alt": "1"
+    }
+  ],
   "front_page": {
     "id": "exhibition-1-1"
   },

@@ -8,9 +8,11 @@
 </head>
 <body>
 	<header>
-		<a href="index.html">‹ Zurück zur Übersicht</a>
-		<h1 id="titel">Tripnjungle</h1>
-		<p id="theme"></p>
+		<div class="header_inner">
+			<a href="index.html">‹ Zurück zur Übersicht</a>
+			<h1 id="titel">Tripnjungle</h1>
+			<p id="theme"></p>
+		</div>
 	</header>
 
 	<main>
@@ -29,6 +31,12 @@
 
 		<p id="description"></p>
 
+		<!-- Intro-Video der Ausstellung, zum erneuten Anschauen -->
+		<section id="video" class="video_section" hidden>
+			<h2 class="section_title">Video</h2>
+			<div id="video_box" class="video_box"></div>
+		</section>
+
 		<div id="galerie" class="galerie"></div>
 	</main>
 
@@ -37,6 +45,9 @@
 		<button id="viewer_close" class="viewer_close" aria-label="Schließen">×</button>
 		<img id="viewer_image" alt="">
 	</div>
+    <script src="js/data.js"></script>
+    <script src="js/nav.js"></script>
+    <script src="js/intro.js"></script>
     <script src="js/exhibition.js"></script>
 </body>
 </html>
