@@ -139,6 +139,35 @@ function resolveFrontPage(exhibition) {
   return { ...exhibition, front_page: media || null };
 }
 
+// Poster als Element:
+//   gesperrt            → <div class="poster_locked"><img></div>, kein Link
+//   mit Intro-Video     → <a data-intro> (intro.js öffnet das Overlay)
+//   ohne Video          → <a> direkt zur Ausstellung
+function createPosterElement(exhibition, poster, altText) {
+  const image = document.createElement("img");
+
+  image.src = poster.src;
+  image.alt = poster.alt || altText || "Poster: " + exhibition.titel;
+
+  let wrapper;
+
+  if (isLocked(exhibition)) {
+    wrapper = document.createElement("div");
+    wrapper.className = "poster_locked";
+  } else {
+    wrapper = document.createElement("a");
+    wrapper.href = getExhibitionLink(exhibition);
+
+    if (getYouTubeId(exhibition.video)) {
+      wrapper.dataset.intro = "true";
+    }
+  }
+
+  wrapper.appendChild(image);
+
+  return wrapper;
+}
+
 // Nur einfache ids erlauben
 function isValidId(id) {
   return /^[a-z0-9-]+$/i.test(id || "");

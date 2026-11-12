@@ -180,18 +180,39 @@ function findNextExhibition(exhibitions) {
 // Das Poster nimmt den Platz der Slideshow ein, die Slideshow rutscht
 // darunter. Die Seite passt dann nicht mehr auf einen Bildschirm und scrollt.
 function showPoster(exhibition) {
-  const poster = exhibition.posters[0];
-  const anchor = document.createElement("a");
-  const image = document.createElement("img");
-
-  anchor.href = getExhibitionLink(exhibition);
-  image.src = poster.src;
-  image.alt = poster.alt || "Poster: " + exhibition.titel;
-
-  anchor.appendChild(image);
-  posterContainer.appendChild(anchor);
+  posterContainer.appendChild(createPosterElement(exhibition, exhibition.posters[0]));
   posterContainer.hidden = false;
   document.documentElement.classList.replace("fit", "has_poster");
+}
+
+// Alle kommenden Poster unter der Slideshow, nach Datum sortiert.
+// Das Poster, das schon oben über der Slideshow steht, wird ausgelassen.
+function showUpcomingPosters(exhibitions, shownPoster) {
+  const container = document.getElementById("upcoming_posters");
+  const today = getToday();
+  const upcoming = exhibitions
+    .filter((exhibition) => exhibition.posters?.length && isUpcoming(exhibition, today))
+    .sort(compareByDate);
+
+  upcoming.forEach((exhibition) => {
+    exhibition.posters.forEach((poster) => {
+      if (!poster.src || poster === shownPoster) {
+        return;
+      }
+
+      const element = createPosterElement(exhibition, poster);
+      const caption = document.createElement("p");
+
+      element.querySelector("img").loading = "lazy";
+      caption.className = "upcoming_caption";
+      caption.textContent = exhibition.titel + " · " + formatDate(exhibition);
+
+      element.appendChild(caption);
+      container.appendChild(element);
+    });
+  });
+
+  container.hidden = container.childElementCount === 0;
 }
 
 // ---------- Laden ----------
@@ -218,6 +239,8 @@ async function start() {
   if (nextExhibition) {
     showPoster(nextExhibition);
   }
+
+  showUpcomingPosters(exhibitions, nextExhibition?.posters[0]);
 
   // In der Slideshow nur freigeschaltete Ausstellungen: gesperrte sind
   // über ihr Poster sichtbar, ihr Deckblatt soll noch nicht zu sehen sein

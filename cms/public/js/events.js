@@ -4,8 +4,9 @@
 //   <body data-page="archive"> → vergangene Ausstellungen, neueste zuerst
 //
 // Pro Ausstellung: alle Poster nebeneinander, Titel, Datum, Uhrzeit, Ort,
-// Beschreibung und der Link zur Ausstellung (bei locked: nur ein Hinweis).
-// Klick auf Poster oder Link → Intro-Video (intro.js).
+// Beschreibung und der Link zur Ausstellung (bei locked: nur ein Hinweis,
+// Poster nicht klickbar). Klick auf Poster → Intro-Video (wenn vorhanden),
+// Klick auf den Link → direkt zur Ausstellung.
 
 const listElement = document.getElementById("list");
 const isArchive = document.body.dataset.page === "archive";
@@ -20,16 +21,14 @@ function createPosters(exhibition) {
       return;
     }
 
-    const anchor = document.createElement("a");
-    const image = document.createElement("img");
+    const element = createPosterElement(
+      exhibition,
+      poster,
+      "Poster " + (index + 1) + ": " + exhibition.titel
+    );
 
-    anchor.href = getExhibitionLink(exhibition);
-    image.src = poster.src;
-    image.alt = poster.alt || "Poster " + (index + 1) + ": " + exhibition.titel;
-    image.loading = "lazy";
-
-    anchor.appendChild(image);
-    posters.appendChild(anchor);
+    element.querySelector("img").loading = "lazy";
+    posters.appendChild(element);
   });
 
   return posters;

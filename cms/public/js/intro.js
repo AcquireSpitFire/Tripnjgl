@@ -1,10 +1,11 @@
 // Intro-Video vor einer Ausstellung.
 //
-// Jeder Link zu exhibition.html?id=… wird abgefangen. Statt direkt zur
-// Ausstellung zu springen, öffnet sich ein Overlay mit dem YouTube-Video
-// der Ausstellung (Feld "video" in der JSON). Darunter steht der Knopf
-// „Weiter zur Ausstellung“ – aber nur, wenn die Ausstellung freigeschaltet
-// ist (locked: false). Ist das Video zu Ende, geht es automatisch weiter.
+// Nur Links mit data-intro (Poster, siehe createPosterElement in data.js)
+// werden abgefangen. Statt direkt zur Ausstellung zu springen, öffnet sich
+// ein Overlay mit dem YouTube-Video der Ausstellung (Feld "video").
+// Darunter steht der Knopf „Weiter zur Ausstellung“. Ist das Video zu Ende,
+// geht es automatisch weiter. Slides, Karten und Textlinks führen direkt
+// zur Ausstellung.
 //
 // Warum ein Overlay und keine eigene Seite: Browser erlauben Autoplay mit
 // Ton nur nach einem Klick auf derselben Seite. Der Klick auf das Poster
@@ -110,11 +111,16 @@
       note.textContent = "Diese Ausstellung ist noch nicht freigeschaltet.";
       actions.appendChild(note);
     } else {
-      const button = document.createElement("a");
+      const button = document.createElement("button");
 
       button.className = "intro_button";
-      button.href = getExhibitionLink(exhibition);
+      button.type = "button";
       button.textContent = "Weiter zur Ausstellung ›";
+      // Overlay schließen und zur Ausstellung wechseln
+      button.addEventListener("click", () => {
+        closeIntro();
+        goToExhibition(exhibition);
+      });
       actions.appendChild(button);
     }
 
@@ -170,8 +176,40 @@
             goToExhibition(exhibition);
           }
         },
+        onError: (event) => {
+          showPlayerError(event.data);
+        },
       },
     });
+  }
+
+  // YouTube konnte das Video nicht abspielen: Grund statt schwarzem Feld anzeigen.
+  // Codes: 2 = ungültige ID, 5 = Player-Fehler, 100 = nicht gefunden/privat,
+  // 101/150 = Einbetten vom Besitzer nicht erlaubt, 153 = Einbettung ohne Referrer
+  function showPlayerError(code) {
+    const box = overlayElement?.querySelector(".intro_player_box");
+
+    if (!box) {
+      return;
+    }
+
+    const reasons = {
+      2: "Die Video-ID ist ungültig.",
+      100: "Das Video wurde nicht gefunden oder ist privat.",
+      101: "Der Besitzer erlaubt das Einbetten dieses Videos nicht (YouTube Studio → Video → „Einbetten zulassen“).",
+      150: "Der Besitzer erlaubt das Einbetten dieses Videos nicht (YouTube Studio → Video → „Einbetten zulassen“).",
+    };
+
+    const message = document.createElement("p");
+
+    message.className = "intro_error";
+    message.textContent =
+      "Video kann nicht abgespielt werden (YouTube-Fehler " + code + "). " +
+      (reasons[code] || "");
+
+    box.innerHTML = "";
+    box.appendChild(message);
+    console.error("YouTube-Fehler", code, "bei Video der Ausstellung");
   }
 
   async function openIntro(id) {
@@ -209,17 +247,18 @@
     }
   }
 
-  // Alle Links zur Ausstellung abfangen (auch solche, die erst später
-  // ins DOM kommen, z. B. Poster und Slideshow)
+  // Nur Poster-Links (data-intro) abfangen, auch solche, die erst später
+  // ins DOM kommen
   document.addEventListener("click", (event) => {
     // Neue Tabs per Strg/Cmd/Mittelklick weiter erlauben
     if (event.defaultPrevented || event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey) {
       return;
     }
 
-    const anchor = event.target.closest?.('a[href*="exhibition.html?id="]');
+    const anchor = event.target.closest?.("a[data-intro]");
 
-    if (!anchor) {
+    // Links innerhalb des Overlays nicht erneut abfangen
+    if (!anchor || anchor.closest("#intro")) {
       return;
     }
 

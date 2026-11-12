@@ -261,7 +261,8 @@ video {
   margin-bottom: 3rem;
 }
 
-.poster a {
+.poster a,
+.poster .poster_locked {
   display: block;
 }
 
@@ -271,6 +272,32 @@ video {
   max-width: calc(100vw - 2 * var(--page-pad));
   max-height: var(--poster-max-height);
   aspect-ratio: auto;
+}
+
+/* Alle kommenden Poster unter der Slideshow, nach Datum sortiert */
+
+.upcoming {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  gap: 2rem var(--gap);
+  margin-top: 3rem;
+}
+
+.upcoming a,
+.upcoming .poster_locked {
+  display: block;
+}
+
+.upcoming img {
+  width: 100%;
+  height: auto;
+  aspect-ratio: auto;
+}
+
+.upcoming_caption {
+  margin: 0.5rem 0 0;
+  font-size: 0.85rem;
+  letter-spacing: 0.1em;
 }
 
 /* Slideshow unter dem Poster: gleich groß wie ohne Poster */
@@ -487,7 +514,17 @@ main {
   overscroll-behavior-x: contain;   /* am Ende des Bandes nicht „zurück“ blättern */
   scroll-snap-type: x mandatory;
   padding-bottom: 0.75rem;          /* Platz für die Scrollleiste */
+  margin-bottom: 3rem;              /* Abstand zum Video darunter */
   scrollbar-color: #333 transparent;
+}
+
+/* Poster einer gesperrten Ausstellung: sichtbar, aber kein Link */
+.poster_locked {
+  display: block;
+}
+
+.poster_locked img {
+  cursor: default;
 }
 
 .galerie > * {
@@ -610,9 +647,12 @@ main {
   display: inline-block;
   padding: 0.5rem 1.25rem;
   border: 1px solid var(--muted);
+  background: none;
+  font: inherit;
   font-size: 0.85rem;
   letter-spacing: 0.1em;
   color: var(--text);
+  cursor: pointer;
   transition: border-color 0.2s;
 }
 
@@ -625,6 +665,21 @@ main {
   margin: 0;
   font-size: 0.85rem;
   letter-spacing: 0.1em;
+}
+
+/* Fehlermeldung an Stelle des Videos */
+.intro_player_box {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.intro_error {
+  max-width: 40ch;
+  margin: 0;
+  padding: 1rem;
+  text-align: center;
+  font-size: 0.85rem;
 }
 
 
@@ -686,7 +741,8 @@ main {
   gap: var(--gap);
 }
 
-.event_posters a {
+.event_posters a,
+.event_posters .poster_locked {
   display: block;
   flex: 1 1 14rem;
   max-width: 24rem;
@@ -801,7 +857,8 @@ main {
     gap: 1rem;
   }
 
-  .event_posters a {
+  .event_posters a,
+  .event_posters .poster_locked {
     max-width: none;
   }
 
