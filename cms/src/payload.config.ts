@@ -32,6 +32,9 @@ export default buildConfig({
     client: {
       url: process.env.DATABASE_URI || 'file:./tripnjungle.db',
     },
+    // Produktion: Tabellen kommen aus src/migrations ("payload migrate" vor dem Start),
+    // Entwicklung: Schema wird automatisch angepasst (push)
+    migrationDir: path.resolve(dirname, 'migrations'),
   }),
   // Nur die eigene Origin darf die API aus dem Browser aufrufen.
   // Das Frontend wird aus public/ von derselben App ausgeliefert.

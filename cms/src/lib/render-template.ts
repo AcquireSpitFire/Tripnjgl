@@ -3,10 +3,10 @@
 //   {{{key}}} → roh (für JSON-LD)
 import fs from 'fs'
 import path from 'path'
-import { fileURLToPath } from 'url'
 
-const dirname = path.dirname(fileURLToPath(import.meta.url))
-const templatesDir = path.resolve(dirname, '..', 'templates')
+// Relativ zum Arbeitsverzeichnis (cms/), weil der gebündelte Code im Build
+// an anderer Stelle liegt als die Quelldatei
+const templatesDir = path.join(process.cwd(), 'src', 'templates')
 const cache = new Map<string, string>()
 
 export function escapeHtml(value: unknown): string {

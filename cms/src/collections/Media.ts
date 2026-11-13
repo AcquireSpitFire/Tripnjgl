@@ -28,7 +28,8 @@ export const Media: CollectionConfig = {
     read: ({ req }) => (req.user ? true : { locked: { equals: false } }),
   },
   upload: {
-    staticDir: 'media',
+    // Ablageort der Dateien; beim Hosting auf ein persistentes Volume zeigen (MEDIA_DIR)
+    staticDir: process.env.MEDIA_DIR || 'media',
     mimeTypes: ['image/*', 'video/*'],
     imageSizes: [
       {
