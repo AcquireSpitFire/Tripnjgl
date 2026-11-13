@@ -29,7 +29,24 @@ Im Admin unter **Ausstellungen**:
 - Erlaubte Dateitypen: JPEG, PNG, WebP, AVIF, GIF, MP4, WebM, MOV. Kein SVG, kein HEIC
   (iPhone-Fotos vorher als JPEG exportieren).
 
-Der About-Text steht in `src/templates/about.html`.
+## Site settings (About, Impressum, Datenschutz)
+
+Im Admin unter **Site settings** (Globals), vor dem Livegang komplett ausfüllen:
+
+- **About**: Seitenbeschreibung für Suchmaschinen, About-Text (Leerzeile = Absatz), Kontakt-Mail.
+- **Legal notice**: Land (Deutschland/Österreich, steuert die Gesetzesangaben), Name, Anschrift,
+  E-Mail, Telefon, ggf. Rechtsform/Register/UID, Verantwortlicher nach § 18 MStV (nur DE).
+- **Privacy**: Hoster (Name, Adresse, Serverstandort, Sitz außerhalb der EU ja/nein, Link zu dessen
+  Datenschutzerklärung), optionaler Zusatztext.
+
+Die Seiten `/imprint` und `/privacy` entstehen daraus; sie sind im Footer jeder Seite verlinkt.
+Fehlende Angaben erscheinen auf der Seite gelb markiert, damit nichts leer live geht.
+
+**YouTube-Zustimmung:** Videos werden erst nach einem Klick auf „Play video“ geladen (Hinweiskarte mit
+Link zur Datenschutzerklärung, Zwei-Klick-Lösung). Die Entscheidung wird im Browser gemerkt; erst dann
+wird die YouTube-API im Hintergrund vorgeladen. Auf `/privacy` gibt es einen Knopf zum Zurücksetzen.
+Dadurch braucht die Seite kein Cookie-Banner: YouTube ist der einzige Drittanbieter, das Admin-Cookie
+ist technisch notwendig.
 
 ## Hosting (Railway)
 
@@ -42,6 +59,7 @@ Der About-Text steht in `src/templates/about.html`.
    - `PAYLOAD_PUBLIC_SERVER_URL=https://deine-domain.de`
 4. Domain in Railway hinzufügen, beim Registrar den angezeigten CNAME setzen.
 5. Nach dem ersten Deploy sofort `https://deine-domain.de/admin` öffnen und den Admin-Nutzer anlegen.
+6. **Site settings** ausfüllen (Impressum, Datenschutz, About), dann `/imprint` und `/privacy` prüfen.
 
 `npm start` führt zuerst die Datenbank-Migrationen aus (`src/migrations`) und startet dann den Server.
 Backup = `tripnjungle.db` + Ordner `media/` kopieren.
@@ -59,8 +77,9 @@ Schema direkt angepasst.
 
 - `src/collections/Exhibitions.ts` – Felder, Zugriff, Hook, der `locked` auf die Medien überträgt
 - `src/collections/Media.ts` – Uploads (`MEDIA_DIR`), Bildgrößen, öffentlich nur mit `locked: false`
+- `src/globals/Site.ts` – Site settings (About, Impressum, Datenschutz); `src/lib/site.ts` bereitet sie für die Vorlagen auf
 - `src/templates/*.html` – die Seiten; `src/app/**/route.ts` liefert sie mit Titel, Beschreibung,
-  Open Graph und JSON-LD aus (`/`, `/exhibitions`, `/events`, `/archive`, `/about`, `/exhibition/<id>`)
+  Open Graph und JSON-LD aus (`/`, `/exhibitions`, `/events`, `/archive`, `/about`, `/imprint`, `/privacy`, `/exhibition/<id>`)
 - `src/app/sitemap.xml`, `src/app/robots.txt` – SEO
 - `src/migrations/` – Datenbank-Migrationen für die Produktion
 - `public/` – CSS, JS, Favicon, OG-Bild; `public/js/data.js` spricht die API an und wählt die Bildgröße

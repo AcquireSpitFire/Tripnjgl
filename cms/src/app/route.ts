@@ -1,6 +1,6 @@
 // "/" – Startseite aus src/templates/index.html
 import { renderStaticPage } from '@/lib/static-page'
-import { SITE_DESCRIPTION, SITE_NAME } from '@/lib/seo'
+import { SITE_NAME } from '@/lib/seo'
 
 export const dynamic = 'force-dynamic'
 
@@ -9,8 +9,8 @@ export async function GET() {
     template: 'index.html',
     path: '/',
     title: `${SITE_NAME} – Photo & video exhibitions`,
-    description: SITE_DESCRIPTION,
-    jsonLd: (base) => ({
+    // Beschreibung: Site settings → Site description, sonst Standardtext
+    jsonLd: (base, description) => ({
       '@context': 'https://schema.org',
       '@graph': [
         {
@@ -18,7 +18,7 @@ export async function GET() {
           '@id': base + '/#website',
           name: SITE_NAME,
           url: base + '/',
-          description: SITE_DESCRIPTION,
+          description,
           inLanguage: 'en',
         },
         {

@@ -7,6 +7,7 @@ import sharp from 'sharp'
 import { Users } from './collections/Users'
 import { Media } from './collections/Media'
 import { Exhibitions } from './collections/Exhibitions'
+import { Site } from './globals/Site'
 
 const filename = fileURLToPath(import.meta.url)
 const dirname = path.dirname(filename)
@@ -22,6 +23,7 @@ export default buildConfig({
     },
   },
   collections: [Exhibitions, Media, Users],
+  globals: [Site],
   // Kein Rich-Text-Editor nötig (nur Textfelder) – spart Abhängigkeiten und Angriffsfläche
   secret: process.env.PAYLOAD_SECRET || '',
   // Öffentliche API: keine tiefen Verschachtelungen (teure Abfragen), kein GraphQL (ungenutzt)

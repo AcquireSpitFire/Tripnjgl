@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>{{title}}</title>
+	<meta name="description" content="{{description}}">
+	<meta name="robots" content="{{robots}}">
+	<link rel="canonical" href="{{canonical}}">
+	<meta property="og:site_name" content="{{siteName}}">
+	<meta property="og:type" content="website">
+	<meta property="og:title" content="{{title}}">
+	<meta property="og:description" content="{{description}}">
+	<meta property="og:url" content="{{canonical}}">
+	<meta property="og:image" content="{{ogImage}}">
+	<meta name="twitter:card" content="summary">
+	<meta name="theme-color" content="#000000">
+	<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+	<link rel="manifest" href="/manifest.webmanifest">
+	<link rel="stylesheet" href="/css/style.css">
+	{{{jsonLd}}}
+</head>
+<body>
+	<header>
+		<div class="header_inner">
+			<p class="site_name"><a href="/">Tripnjungle</a></p>
+			<h1 class="page_title">Privacy policy</h1>
+		</div>
+	</header>
+
+	<!-- Angaben zu Betreiber und Hoster kommen aus Admin → Site settings -->
+	<main class="text_page legal_page">
+		<p class="legal_sub">Datenschutzerklärung · Last updated {{updated}}</p>
+
+		<p>This website shows photo and video exhibitions. It collects as little data as possible: no analytics, no advertising, no cookies for visitors. The following explains what is processed anyway, why, and what your rights are (Art. 13 GDPR).</p>
+
+		<h2>1. Controller</h2>
+		<address>
+			{{{operatorName}}}<br>
+			{{{operatorStreet}}}<br>
+			{{{operatorCity}}}<br>
+			{{{operatorCountry}}}<br>
+			E-mail: {{{operatorEmail}}}
+		</address>
+
+		<h2>2. Hosting and server logs</h2>
+		<p>The website is hosted by {{{hostName}}}, {{{hostAddress}}}. The server is located in {{{hostLocation}}}. When you open a page, your browser automatically transmits your IP address, the time of the request, the page requested, the referring page, and the browser and operating system in use. The hosting provider stores this information in server log files to deliver the pages, to keep the service stable and to detect attacks. Legal basis: Art. 6 (1) (f) GDPR (legitimate interest in a secure and working website). The log files are deleted according to the retention period of the hosting provider, usually within a few days to weeks. The hosting provider processes this data on our behalf under a data processing agreement (Art. 28 GDPR).{{{hostPrivacyLink}}}</p>
+		{{{hostTransferBlock}}}
+
+		<h2>3. YouTube videos (only after you click)</h2>
+		<p>Exhibitions can have an intro video hosted on YouTube, a service of Google Ireland Limited, Gordon House, Barrow Street, Dublin 4, Ireland. <strong>No connection to YouTube or Google is made until you click “Play video”.</strong> Before that, only a notice is shown. When you click, your browser loads the YouTube player and transmits your IP address and information about your device to Google. YouTube may store information in your browser (local storage) and, if you are logged in to a Google account, assign your viewing to that account. We use the privacy-enhanced mode (youtube-nocookie.com), which limits tracking by YouTube, but we have no control over what Google does with the data.</p>
+		<p>Legal basis: your consent, Art. 6 (1) (a) GDPR and {{{consentLaw}}}. Google LLC in the USA may receive data; Google LLC is certified under the EU-US Data Privacy Framework, which the European Commission considers an adequate level of protection (Art. 45 GDPR). Details: <a href="https://policies.google.com/privacy" rel="noopener">policies.google.com/privacy</a>.</p>
+		<p>Your consent is remembered in your browser so that you do not have to confirm it for every video. You can withdraw it at any time: <button type="button" class="legal_button" data-reset-youtube-consent>Forget my YouTube consent</button>. After that, the notice is shown again before any video.</p>
+
+		<h2>4. Local storage in your browser</h2>
+		<p>The website stores two kinds of information on your device, both strictly necessary for the function you requested and therefore without consent ({{{storageLaw}}}): the exhibition data you just opened, for a few minutes, so the exhibition appears instantly after the intro video (session storage, deleted when you close the tab), and your YouTube decision from section 3. No identifiers are created, nothing is sent to us or to third parties.</p>
+
+		<h2>5. Contact by e-mail</h2>
+		<p>If you write to us, we process your e-mail address and the content of your message to answer you. Legal basis: Art. 6 (1) (b) GDPR when the request concerns a contract, otherwise Art. 6 (1) (f) GDPR. Messages are deleted once the matter is settled, unless statutory retention periods apply.</p>
+
+		<h2>6. Administration area</h2>
+		<p>The content of this website is managed in a password-protected area. Only editors log in there; a login cookie is set for them alone. Visitors never receive this cookie.</p>
+
+		<h2>7. Your rights</h2>
+		<p>You have the right to access the personal data we hold about you (Art. 15 GDPR), to rectification (Art. 16), erasure (Art. 17), restriction of processing (Art. 18), data portability (Art. 20) and to object to processing based on legitimate interests (Art. 21). Where processing is based on consent, you may withdraw it at any time with effect for the future. To exercise these rights, contact the controller named in section 1.</p>
+		<p>You also have the right to lodge a complaint with a data protection supervisory authority, in particular in the EU member state of your residence or workplace. {{{authorityNote}}}</p>
+
+		{{{privacyExtra}}}
+	</main>
+
+	<footer class="site_footer">
+		<nav aria-label="Footer">
+			<a href="/">Home</a>
+			<a href="/exhibitions">Exhibitions</a>
+			<a href="/events">Events</a>
+			<a href="/archive">Archive</a>
+			<a href="/about">About</a>
+			<a href="/imprint">Legal notice</a>
+		</nav>
+	</footer>
+
+	<script defer src="/js/data.js"></script>
+	<script defer src="/js/nav.js"></script>
+</body>
+</html>

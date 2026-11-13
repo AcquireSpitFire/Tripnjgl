@@ -360,7 +360,23 @@ function showLocked(exhibition) {
   slideshowElement.hidden = true;
 }
 
-// Intro-Video der Ausstellung unter der Galerie einbetten
+// Intro-Video der Ausstellung unter der Galerie einbetten.
+// Ohne gespeicherte YouTube-Zustimmung erst eine Hinweiskarte (Deckblatt/Poster
+// als Hintergrund, vom eigenen Server); der iframe kommt erst nach dem Klick.
+function embedVideo(exhibition, videoId, autoplay) {
+  const iframe = document.createElement("iframe");
+
+  iframe.src =
+    "https://www.youtube-nocookie.com/embed/" + videoId + "?rel=0" + (autoplay ? "&autoplay=1" : "");
+  iframe.title = "Video: " + exhibition.titel;
+  iframe.allow = "autoplay; fullscreen; picture-in-picture";
+  iframe.allowFullscreen = true;
+  iframe.loading = "lazy";
+
+  videoBox.innerHTML = "";
+  videoBox.appendChild(iframe);
+}
+
 function setupVideo(exhibition) {
   const videoId = getYouTubeId(exhibition.video);
 
@@ -368,15 +384,19 @@ function setupVideo(exhibition) {
     return;
   }
 
-  const iframe = document.createElement("iframe");
+  if (hasYouTubeConsent()) {
+    embedVideo(exhibition, videoId, false);
+  } else {
+    const cover = resolveFrontPage(exhibition).front_page || exhibition.posters?.[0];
 
-  iframe.src = "https://www.youtube-nocookie.com/embed/" + videoId + "?rel=0";
-  iframe.title = "Video: " + exhibition.titel;
-  iframe.allow = "autoplay; fullscreen; picture-in-picture";
-  iframe.allowFullscreen = true;
-  iframe.loading = "lazy";
+    videoBox.appendChild(
+      createYouTubeNotice({
+        cover,
+        onPlay: () => embedVideo(exhibition, videoId, true),
+      })
+    );
+  }
 
-  videoBox.appendChild(iframe);
   videoSection.hidden = false;
 }
 

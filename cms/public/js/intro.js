@@ -7,10 +7,14 @@
 // geht es automatisch weiter. Slides, Karten und Textlinks führen direkt
 // zur Ausstellung.
 //
-// Schnell: Die YouTube-API wird schon im Leerlauf nach dem Seitenaufbau
-// (bzw. beim Berühren eines Posters) geladen. Während das Video läuft,
-// werden die Daten und ersten Bilder der Ausstellung vorgeladen, sodass die
-// Ausstellungsseite danach sofort da ist.
+// Datenschutz: Vor dem ersten Kontakt zu YouTube/Google muss der Besucher
+// zustimmen (Hinweiskarte im Overlay, siehe createYouTubeNotice in data.js).
+// Die Zustimmung wird im Browser gemerkt. Erst mit gespeicherter Zustimmung
+// wird die YouTube-API im Leerlauf bzw. beim Berühren eines Posters vorgeladen.
+//
+// Schnell: Sobald das Overlay offen ist, werden die Daten und ersten Bilder
+// der Ausstellung (eigener Server) vorgeladen, sodass die Ausstellungsseite
+// danach sofort da ist.
 //
 // Warum ein Overlay und keine eigene Seite: Browser erlauben Autoplay mit
 // Ton nur nach einem Klick auf derselben Seite. Der Klick auf das Poster
@@ -51,9 +55,14 @@
     return apiPromise;
   }
 
-  // API im Leerlauf vorladen, sobald die Seite Poster mit Video enthält.
-  // Poster entstehen erst nach dem API-Aufruf, deshalb per MutationObserver.
+  // API im Leerlauf vorladen, sobald die Seite Poster mit Video enthält –
+  // nur mit gespeicherter Zustimmung. Poster entstehen erst nach dem
+  // API-Aufruf, deshalb per MutationObserver.
   function warmUpWhenPostersAppear() {
+    if (!hasYouTubeConsent()) {
+      return;
+    }
+
     const start = () => {
       const idle = window.requestIdleCallback || ((callback) => setTimeout(callback, 1500));
 
@@ -141,11 +150,24 @@
 
     if (videoId) {
       const box = document.createElement("div");
-      const target = document.createElement("div");
 
       box.className = "intro_player_box";
-      target.id = "intro_player";
-      box.appendChild(target);
+
+      if (hasYouTubeConsent()) {
+        box.appendChild(createPlayerTarget());
+      } else {
+        box.appendChild(
+          createYouTubeNotice({
+            cover: exhibition.posters?.[0] || resolveFrontPage(exhibition).front_page,
+            onPlay: () => {
+              box.innerHTML = "";
+              box.appendChild(createPlayerTarget());
+              startPlayer(exhibition, videoId);
+            },
+          })
+        );
+      }
+
       inner.appendChild(box);
     }
 
@@ -192,6 +214,14 @@
     return overlay;
   }
 
+  function createPlayerTarget() {
+    const target = document.createElement("div");
+
+    target.id = "intro_player";
+
+    return target;
+  }
+
   async function startPlayer(exhibition, videoId) {
     await loadYouTubeApi();
 
@@ -222,8 +252,6 @@
         onReady: (event) => {
           event.target.setPlaybackQuality("hd1080");
           event.target.playVideo();
-          // Während das Video läuft: Ausstellung schon laden
-          prefetchExhibition(exhibition);
         },
         onStateChange: (event) => {
           if (event.data === YT.PlayerState.ENDED && !isLocked(exhibition)) {
@@ -291,7 +319,10 @@
     document.body.appendChild(overlayElement);
     document.documentElement.classList.add("intro_open");
 
-    if (videoId) {
+    // Ausstellung (eigener Server) schon laden, während Hinweis oder Video zu sehen ist
+    prefetchExhibition(exhibition);
+
+    if (videoId && hasYouTubeConsent()) {
       startPlayer(exhibition, videoId);
     }
   }
@@ -320,12 +351,13 @@
     openIntro(id);
   });
 
-  // Zeigt die Maus auf ein Poster (oder Finger berührt es): API jetzt laden
+  // Zeigt die Maus auf ein Poster (oder Finger berührt es): API jetzt laden,
+  // sofern der Besucher YouTube schon zugestimmt hat
   ["pointerenter", "touchstart", "focusin"].forEach((type) => {
     document.addEventListener(
       type,
       (event) => {
-        if (event.target.closest?.("a[data-intro]")) {
+        if (hasYouTubeConsent() && event.target.closest?.("a[data-intro]")) {
           loadYouTubeApi();
         }
       },

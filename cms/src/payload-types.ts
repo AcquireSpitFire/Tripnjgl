@@ -89,8 +89,12 @@ export interface Config {
     defaultIDType: number;
   };
   fallbackLocale: null;
-  globals: {};
-  globalsSelect: {};
+  globals: {
+    site: Site;
+  };
+  globalsSelect: {
+    site: SiteSelect<false> | SiteSelect<true>;
+  };
   locale: null;
   widgets: {
     collections: CollectionsWidget;
@@ -463,6 +467,84 @@ export interface PayloadMigrationsSelect<T extends boolean = true> {
   batch?: T;
   updatedAt?: T;
   createdAt?: T;
+}
+/**
+ * Texts for About, the legal notice (Impressum) and the privacy policy. Fill in everything before going live.
+ *
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site".
+ */
+export interface Site {
+  id: number;
+  siteDescription?: string | null;
+  /**
+   * Blank line = new paragraph.
+   */
+  aboutText?: string | null;
+  contactEmail?: string | null;
+  jurisdiction: 'de' | 'at';
+  operatorName?: string | null;
+  operatorStreet?: string | null;
+  operatorCity?: string | null;
+  operatorCountry?: string | null;
+  operatorEmail?: string | null;
+  /**
+   * A second fast contact channel besides e-mail is expected by law.
+   */
+  operatorPhone?: string | null;
+  businessPurpose?: string | null;
+  /**
+   * Only if applicable: legal form, commercial register and number, VAT ID, supervisory authority, chamber. One item per line.
+   */
+  legalExtra?: string | null;
+  /**
+   * Name; the address above applies. Leave empty to use the operator name.
+   */
+  responsiblePerson?: string | null;
+  imprintExtra?: string | null;
+  /**
+   * e.g. Railway Corporation or Hetzner Online GmbH
+   */
+  hostName?: string | null;
+  hostAddress?: string | null;
+  /**
+   * e.g. Amsterdam, Netherlands (EU)
+   */
+  hostLocation?: string | null;
+  hostOutsideEu?: boolean | null;
+  hostPrivacyUrl?: string | null;
+  privacyExtra?: string | null;
+  updatedAt?: string | null;
+  createdAt?: string | null;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "site_select".
+ */
+export interface SiteSelect<T extends boolean = true> {
+  siteDescription?: T;
+  aboutText?: T;
+  contactEmail?: T;
+  jurisdiction?: T;
+  operatorName?: T;
+  operatorStreet?: T;
+  operatorCity?: T;
+  operatorCountry?: T;
+  operatorEmail?: T;
+  operatorPhone?: T;
+  businessPurpose?: T;
+  legalExtra?: T;
+  responsiblePerson?: T;
+  imprintExtra?: T;
+  hostName?: T;
+  hostAddress?: T;
+  hostLocation?: T;
+  hostOutsideEu?: T;
+  hostPrivacyUrl?: T;
+  privacyExtra?: T;
+  updatedAt?: T;
+  createdAt?: T;
+  globalType?: T;
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>{{title}}</title>
+	<meta name="description" content="{{description}}">
+	<meta name="robots" content="{{robots}}">
+	<link rel="canonical" href="{{canonical}}">
+	<meta property="og:site_name" content="{{siteName}}">
+	<meta property="og:type" content="website">
+	<meta property="og:title" content="{{title}}">
+	<meta property="og:description" content="{{description}}">
+	<meta property="og:url" content="{{canonical}}">
+	<meta property="og:image" content="{{ogImage}}">
+	<meta name="twitter:card" content="summary">
+	<meta name="theme-color" content="#000000">
+	<link rel="icon" href="/favicon.svg" type="image/svg+xml">
+	<link rel="manifest" href="/manifest.webmanifest">
+	<link rel="stylesheet" href="/css/style.css">
+	{{{jsonLd}}}
+</head>
+<body>
+	<header>
+		<div class="header_inner">
+			<p class="site_name"><a href="/">Tripnjungle</a></p>
+			<h1 class="page_title">Legal notice</h1>
+		</div>
+	</header>
+
+	<!-- Alle Angaben kommen aus Admin → Site settings → Legal notice -->
+	<main class="text_page legal_page">
+		<p class="legal_sub">Impressum · {{{lawReference}}}</p>
+
+		<h2>Operator of this website</h2>
+		<address>
+			{{{operatorName}}}<br>
+			{{{operatorStreet}}}<br>
+			{{{operatorCity}}}<br>
+			{{{operatorCountry}}}
+		</address>
+
+		<h2>Contact</h2>
+		<p>E-mail: {{{operatorEmail}}}<br>
+		Phone: {{{operatorPhone}}}</p>
+
+		{{{businessPurposeBlock}}}
+		{{{legalExtraBlock}}}
+		{{{responsibleBlock}}}
+
+		<h2>Copyright</h2>
+		<p>All photos, videos and texts on this website are protected by copyright. Unless stated otherwise, the rights belong to the operator named above. Any use beyond private viewing requires written permission.</p>
+
+		<h2>Liability for links</h2>
+		<p>This website embeds videos from YouTube and may link to external websites. The operator has no influence on their content; the respective providers are responsible for it.</p>
+
+		{{{imprintExtra}}}
+	</main>
+
+	<footer class="site_footer">
+		<nav aria-label="Footer">
+			<a href="/">Home</a>
+			<a href="/exhibitions">Exhibitions</a>
+			<a href="/events">Events</a>
+			<a href="/archive">Archive</a>
+			<a href="/about">About</a>
+			<a href="/privacy">Privacy</a>
+		</nav>
+	</footer>
+
+	<script defer src="/js/data.js"></script>
+	<script defer src="/js/nav.js"></script>
+</body>
+</html>

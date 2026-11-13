@@ -959,3 +959,130 @@ main {
     margin-top: 0.25rem;
   }
 }
+
+
+/* ---------- 8. YouTube-Hinweis (vor dem ersten Laden eines Videos) ---------- */
+
+.yt_notice {
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: var(--frame);
+}
+
+.yt_notice_cover {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0.25;
+  filter: blur(2px);
+}
+
+.yt_notice_body {
+  position: relative;
+  max-width: 44ch;
+  padding: 1rem 1.5rem;
+  text-align: center;
+}
+
+.yt_notice_text {
+  margin: 0 0 1rem;
+  font-size: 0.85rem;
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.yt_notice_text a {
+  text-decoration: underline;
+}
+
+.yt_notice_button {
+  padding: 0.6rem 1.4rem;
+  border: 1px solid var(--text);
+  background: rgba(0, 0, 0, 0.6);
+  font: inherit;
+  font-size: 0.85rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.yt_notice_button:hover,
+.yt_notice_button:focus-visible {
+  background: var(--text);
+  color: var(--bg);
+}
+
+
+/* ---------- 9. Rechtliches (Legal notice, Privacy) ---------- */
+
+.legal_page {
+  line-height: 1.6;
+}
+
+.legal_page h2 {
+  margin: 2rem 0 0.5rem;
+  font-size: 0.85rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.legal_page p,
+.legal_page address,
+.legal_page ul {
+  max-width: 70ch;
+}
+
+.legal_page address {
+  font-style: normal;
+}
+
+.legal_page ul {
+  padding-left: 1.2rem;
+}
+
+.legal_page a {
+  text-decoration: underline;
+}
+
+.legal_sub {
+  margin-top: 0;
+  font-size: 0.8rem;
+  color: var(--muted);
+}
+
+/* Fehlende Angabe: deutlich sichtbar, bis sie im Admin eingetragen ist */
+.legal_page mark,
+.text_page mark {
+  padding: 0 0.3em;
+  background: #ffd54a;
+  color: #000;
+}
+
+.legal_button {
+  padding: 0.3rem 0.8rem;
+  border: 1px solid var(--muted);
+  background: none;
+  font: inherit;
+  font-size: 0.85rem;
+  color: var(--text);
+  cursor: pointer;
+}
+
+.legal_button:hover,
+.legal_button:focus-visible {
+  border-color: var(--text);
+}
+
+.legal_button:disabled {
+  cursor: default;
+  color: var(--muted);
+}

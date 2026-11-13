@@ -390,3 +390,96 @@ async function getExhibition(id) {
 
   return cached || loadExhibition(id);
 }
+
+// ---------- YouTube-Zustimmung ----------
+//
+// Videos liegen bei YouTube. Vor dem ersten Kontakt zu Google (Player-Skript,
+// iframe) muss der Besucher zustimmen (§ 25 TDDDG / DSGVO). Die Entscheidung
+// wird im localStorage gemerkt; /privacy bietet einen Knopf zum Zurücksetzen.
+
+const YOUTUBE_CONSENT_KEY = "tj:consent:youtube";
+
+function hasYouTubeConsent() {
+  try {
+    return localStorage.getItem(YOUTUBE_CONSENT_KEY) === "1";
+  } catch (error) {
+    return false;
+  }
+}
+
+function setYouTubeConsent(value) {
+  try {
+    if (value) {
+      localStorage.setItem(YOUTUBE_CONSENT_KEY, "1");
+    } else {
+      localStorage.removeItem(YOUTUBE_CONSENT_KEY);
+    }
+  } catch (error) {
+    // localStorage nicht verfügbar – dann gilt die Zustimmung nur für diesen Klick
+  }
+}
+
+// Hinweiskarte an Stelle des Videos. options:
+//   cover   – Medium (Deckblatt/Poster) als Hintergrund, vom eigenen Server
+//   onPlay  – wird nach dem Klick auf „Play video“ aufgerufen
+function createYouTubeNotice(options = {}) {
+  const notice = document.createElement("div");
+
+  notice.className = "yt_notice";
+
+  if (options.cover) {
+    const image = document.createElement("img");
+
+    setImageSources(image, options.cover, { size: "medium", lazy: true });
+    image.alt = "";
+    image.className = "yt_notice_cover";
+    notice.appendChild(image);
+  }
+
+  const body = document.createElement("div");
+
+  body.className = "yt_notice_body";
+
+  const text = document.createElement("p");
+
+  text.className = "yt_notice_text";
+  text.append(
+    "This video is hosted on YouTube. If you play it, your IP address and device information are sent to Google. Details in the ",
+  );
+
+  const link = document.createElement("a");
+
+  link.href = "/privacy";
+  link.textContent = "privacy policy";
+  text.appendChild(link);
+  text.append(". Your choice is remembered in this browser.");
+  body.appendChild(text);
+
+  const button = document.createElement("button");
+
+  button.type = "button";
+  button.className = "yt_notice_button";
+  button.textContent = "▶ Play video";
+  button.addEventListener("click", () => {
+    setYouTubeConsent(true);
+    options.onPlay?.();
+  });
+  body.appendChild(button);
+
+  notice.appendChild(body);
+
+  return notice;
+}
+
+// /privacy: „Forget my YouTube consent“
+document.addEventListener("click", (event) => {
+  const button = event.target.closest?.("[data-reset-youtube-consent]");
+
+  if (!button) {
+    return;
+  }
+
+  setYouTubeConsent(false);
+  button.textContent = "Done – the notice will be shown again before videos.";
+  button.disabled = true;
+});
