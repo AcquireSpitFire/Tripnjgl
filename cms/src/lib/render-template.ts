@@ -54,12 +54,39 @@ export function summarize(text: string | null | undefined, max = 160): string {
   return clean.slice(0, max - 1).replace(/\s+\S*$/, '') + '…'
 }
 
+// Content-Security-Policy für die Frontend-Seiten (nicht für /admin, das hat eigene Regeln).
+// Erlaubt: eigene Skripte/Styles/Bilder, YouTube-Player (API-Skript + iframe), sonst nichts.
+// Inline-Skripte sind nicht erlaubt; das JSON-LD ist ein Datenblock und wird nicht ausgeführt.
+function contentSecurityPolicy(): string {
+  // Medien-URLs sind absolut auf PAYLOAD_PUBLIC_SERVER_URL; falls die Seite unter einer
+  // anderen Adresse aufgerufen wird (z. B. Vorschau-Domain), muss diese Origin erlaubt sein
+  const serverOrigin = (process.env.PAYLOAD_PUBLIC_SERVER_URL || '').replace(/\/$/, '')
+  const self = ["'self'", serverOrigin].filter(Boolean).join(' ')
+
+  return [
+    "default-src 'self'",
+    `script-src 'self' https://www.youtube.com https://www.youtube-nocookie.com https://s.ytimg.com`,
+    "style-src 'self'",
+    `img-src ${self} data:`,
+    `media-src ${self}`,
+    `connect-src ${self}`,
+    'frame-src https://www.youtube-nocookie.com https://www.youtube.com',
+    "font-src 'self'",
+    "manifest-src 'self'",
+    "object-src 'none'",
+    "base-uri 'self'",
+    "form-action 'self'",
+    "frame-ancestors 'self'",
+  ].join('; ')
+}
+
 export function htmlResponse(html: string, init?: { status?: number; cache?: string }): Response {
   return new Response(html, {
     status: init?.status ?? 200,
     headers: {
       'Content-Type': 'text/html; charset=utf-8',
       'Cache-Control': init?.cache ?? 'public, s-maxage=60, stale-while-revalidate=600',
+      'Content-Security-Policy': contentSecurityPolicy(),
     },
   })
 }

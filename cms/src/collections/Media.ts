@@ -30,7 +30,18 @@ export const Media: CollectionConfig = {
   upload: {
     // Ablageort der Dateien; beim Hosting auf ein persistentes Volume zeigen (MEDIA_DIR)
     staticDir: process.env.MEDIA_DIR || 'media',
-    mimeTypes: ['image/*', 'video/*'],
+    // Nur echte Foto-/Videoformate. Kein SVG: SVG kann Skripte enthalten und würde
+    // von derselben Origin ausgeliefert (Stored XSS bei kompromittiertem Admin-Konto).
+    mimeTypes: [
+      'image/jpeg',
+      'image/png',
+      'image/webp',
+      'image/avif',
+      'image/gif',
+      'video/mp4',
+      'video/webm',
+      'video/quicktime',
+    ],
     imageSizes: [
       {
         name: 'thumb',

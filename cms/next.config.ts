@@ -40,9 +40,13 @@ const nextConfig: NextConfig = {
         ],
       },
       {
-        // Mediendateien ändern sich unter einer URL nicht (neue Datei = neuer Name)
+        // Mediendateien ändern sich unter einer URL nicht (neue Datei = neuer Name).
+        // "sandbox": selbst wenn eine Datei Skripte enthielte, dürfte sie nichts ausführen.
         source: '/api/media/file/:path*',
-        headers: [{ key: 'Cache-Control', value: 'public, max-age=31536000, immutable' }],
+        headers: [
+          { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+          { key: 'Content-Security-Policy', value: "sandbox; default-src 'none'" },
+        ],
       },
       {
         source: '/:path(css|js)/:file*',

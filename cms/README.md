@@ -26,6 +26,8 @@ Im Admin unter **Ausstellungen**:
   selbst nicht. Haken entfernen = freischalten. Gesperrte Ausstellungen fehlen in Slideshow,
   Exhibitions-Liste und Sitemap; ihre Dateien sind nicht abrufbar.
 - Bilder werden beim Upload in drei WebP-Größen (600/1280/2560 px) abgelegt, das Original bleibt.
+- Erlaubte Dateitypen: JPEG, PNG, WebP, AVIF, GIF, MP4, WebM, MOV. Kein SVG, kein HEIC
+  (iPhone-Fotos vorher als JPEG exportieren).
 
 Der About-Text steht in `src/templates/about.html`.
 

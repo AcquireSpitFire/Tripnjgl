@@ -1,5 +1,4 @@
 import { sqliteAdapter } from '@payloadcms/db-sqlite'
-import { lexicalEditor } from '@payloadcms/richtext-lexical'
 import path from 'path'
 import { buildConfig } from 'payload'
 import { fileURLToPath } from 'url'
@@ -23,8 +22,13 @@ export default buildConfig({
     },
   },
   collections: [Exhibitions, Media, Users],
-  editor: lexicalEditor(),
+  // Kein Rich-Text-Editor nötig (nur Textfelder) – spart Abhängigkeiten und Angriffsfläche
   secret: process.env.PAYLOAD_SECRET || '',
+  // Öffentliche API: keine tiefen Verschachtelungen (teure Abfragen), kein GraphQL (ungenutzt)
+  maxDepth: 2,
+  graphQL: {
+    disable: true,
+  },
   typescript: {
     outputFile: path.resolve(dirname, 'payload-types.ts'),
   },
