@@ -50,19 +50,45 @@ ist technisch notwendig.
 
 ## Hosting (Railway)
 
-1. Repo zu GitHub pushen, in Railway „Deploy from GitHub“, **Root Directory: `cms`**.
-2. Volume anlegen und unter `/data` einhängen.
-3. Variablen setzen:
-   - `PAYLOAD_SECRET` – langer Zufallsstring
+Einmalige Einrichtung, etwa eine Stunde. Alles Weitere passiert danach im Admin.
+
+1. Alles committen und zu GitHub pushen (`.env`, `*.db` und `media/` bleiben per .gitignore draußen).
+2. Auf railway.com anmelden, **New Project → Deploy from GitHub repo**, dieses Repo wählen.
+3. Im Service unter **Settings**:
+   - **Root Directory: `cms`** (sonst findet Railway kein package.json)
+   - **Region: Europe** (Amsterdam). Dann bleiben die Daten in der EU.
+   - Build und Start übernimmt `cms/railway.json` (`npm ci && npm run build`, `npm start`, Healthcheck `/robots.txt`).
+4. **Volume** anlegen (rechte Maustaste auf den Service → Attach Volume), Mount Path **`/data`**.
+   Dort liegen Datenbank und Medien; ohne Volume ist nach jedem Deploy alles weg.
+5. Unter **Variables** eintragen:
+   - `PAYLOAD_SECRET` – langer Zufallsstring, z. B. aus `openssl rand -hex 32`; nie weitergeben
    - `DATABASE_URI=file:/data/tripnjungle.db`
    - `MEDIA_DIR=/data/media`
-   - `PAYLOAD_PUBLIC_SERVER_URL=https://deine-domain.de`
-4. Domain in Railway hinzufügen, beim Registrar den angezeigten CNAME setzen.
-5. Nach dem ersten Deploy sofort `https://deine-domain.de/admin` öffnen und den Admin-Nutzer anlegen.
-6. **Site settings** ausfüllen (Impressum, Datenschutz, About), dann `/imprint` und `/privacy` prüfen.
+   - `PAYLOAD_PUBLIC_SERVER_URL=https://deine-domain.de` (ohne Schrägstrich am Ende; bis die Domain
+     steht, die von Railway erzeugte `https://….up.railway.app`-Adresse eintragen)
+6. **Settings → Networking → Custom Domain**: Domain eintragen, den angezeigten CNAME beim Registrar
+   setzen. HTTPS richtet Railway automatisch ein. Danach `PAYLOAD_PUBLIC_SERVER_URL` auf die Domain
+   ändern (löst einen Neustart aus).
+7. Nach dem ersten erfolgreichen Deploy **sofort** `https://deine-domain.de/admin` öffnen und den
+   Admin-Nutzer anlegen. Wer das zuerst tut, ist Admin. Starkes Passwort.
+8. **Site settings** ausfüllen. Für die Datenschutzerklärung unter Privacy:
+   - Hosting provider: `Railway Corporation`, Adresse laut Impressum/Terms auf railway.com
+   - Server location: `Amsterdam, Netherlands (EU)`
+   - Haken **„outside the EU/EEA“ setzen** (US-Unternehmen, auch wenn der Server in der EU steht)
+   - Link zur Datenschutzerklärung von Railway (railway.com/legal/privacy)
+   - Den Auftragsverarbeitungsvertrag (DPA) von Railway unter railway.com/legal akzeptieren bzw. ablegen.
+9. Prüfen: Startseite, `/robots.txt` und `/sitemap.xml` zeigen die Domain, `/imprint` und
+   `/privacy` ohne gelbe Markierungen, ein Testposter hochladen, Video-Hinweis und Player testen.
+10. Domain in der Google Search Console anmelden, Sitemap `https://deine-domain.de/sitemap.xml` eintragen.
 
-`npm start` führt zuerst die Datenbank-Migrationen aus (`src/migrations`) und startet dann den Server.
-Backup = `tripnjungle.db` + Ordner `media/` kopieren.
+Jeder weitere Push auf den verbundenen Branch löst automatisch Build und Deploy aus. `npm start` führt
+zuerst die Datenbank-Migrationen aus (`src/migrations`) und startet dann den Server.
+
+**Backup:** Railway sichert Volumes nicht automatisch dauerhaft. Unter Volume → Backups lassen sich
+tägliche Snapshots aktivieren (kostenpflichtig). Zusätzlich gelegentlich `tripnjungle.db` und `media/`
+aus dem Volume herunterladen (Railway CLI: `railway ssh` bzw. Volume-Download).
+
+**Kosten:** Hobby-Plan etwa 5 USD/Monat inklusive Guthaben; die Seite verbraucht davon wenig.
 
 Für einen eigenen Server (VPS) gilt dasselbe: Node 24, `.env` wie oben, `npm ci && npm run build`,
 `npm start` unter PM2/systemd, Caddy oder nginx als HTTPS-Proxy davor.
