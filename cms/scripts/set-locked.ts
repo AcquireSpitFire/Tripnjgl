@@ -26,7 +26,11 @@ async function run() {
     process.exit(1)
   }
 
-  await payload.update({ collection: 'exhibitions', id: doc.id, data: { locked: value === 'true' } })
+  await payload.update({
+    collection: 'exhibitions',
+    id: doc.id,
+    data: { visibility: value === 'true' ? 'locked' : 'public' },
+  })
 
   const media = await payload.find({ collection: 'media', limit: 100, overrideAccess: true })
 

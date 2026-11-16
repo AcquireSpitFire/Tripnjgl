@@ -6,7 +6,8 @@
 // Darunter: Beschreibung, Galerie mit allen Bildern/Videos
 // (Handy: untereinander, Desktop: seitlich scrollbares Band) und ganz
 // unten das Intro-Video zum erneuten Anschauen.
-// Gesperrte Ausstellungen (locked: true) zeigen nur einen Hinweis.
+// Gesperrte Ausstellungen (locked: true) zeigen nur einen Hinweis,
+// außer bei visibility "link" (Zugang über die direkte Adresse).
 // Die Daten kommen aus dem sessionStorage (von intro.js vorgeladen) oder der API.
 
 const titelElement = document.getElementById("titel");
@@ -403,7 +404,8 @@ function setupVideo(exhibition) {
 function showExhibition(exhibition) {
   currentExhibition = exhibition;
 
-  if (isLocked(exhibition)) {
+  // „Gesperrt mit Link“ zählt hier als sichtbar: wer die Adresse hat, sieht den Inhalt
+  if (!canView(exhibition)) {
     showLocked(exhibition);
     return;
   }

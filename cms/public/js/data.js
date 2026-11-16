@@ -6,13 +6,17 @@
 // App ausgeliefert wird. Hier werden sie in die Form gebracht, die die
 // Seiten-Skripte erwarten:
 //   id, titel, theme, description, date, time, location,
-//   locked (true/false), video (YouTube-URL oder -ID),
+//   locked (true/false), visibility ("locked"|"link"|"public"),
+//   release ("scheduled"|"comingSoon"), video (YouTube-URL oder -ID),
 //   posters [ medium ], front_page medium, medien [ medium ]
 // Ein Medium: { id, type ("image"|"video"), src, alt, name, width, height,
 //               sizes: { thumb, medium, large } (je {url, width, height}) }
 //
 // Bei gesperrten Ausstellungen (locked: true) liefert die API ohne Login
 // weder Deckblatt noch Medien, und die Dateien sind nicht abrufbar.
+// Ausnahme visibility "link": gilt überall als gesperrt (keine Links, nicht in
+// Slideshow und Listen), aber die Ausstellungsseite selbst zeigt den Inhalt.
+// Ausstellungen im Release "planning" liefert die API gar nicht.
 
 const API_PATH = "/api/exhibitions";
 const CACHE_PREFIX = "tj:exhibition:";
@@ -28,6 +32,16 @@ function getExhibitionLink(exhibition) {
 // Fehlt das Feld, gilt die Ausstellung als gesperrt.
 function isLocked(exhibition) {
   return exhibition?.locked !== false;
+}
+
+// Darf die Ausstellungsseite den Inhalt zeigen? Freigeschaltet oder „mit Link“
+function canView(exhibition) {
+  return !isLocked(exhibition) || exhibition?.visibility === "link";
+}
+
+// Ohne festes Datum angekündigt
+function isComingSoon(exhibition) {
+  return exhibition?.release === "comingSoon";
 }
 
 // YouTube-ID aus URL (watch, youtu.be, embed, shorts, live) oder nackter ID
@@ -96,8 +110,12 @@ function getToday() {
   return today;
 }
 
-// Findet noch statt (heute oder später)
+// Findet noch statt (heute oder später) oder ist als „Coming soon“ angekündigt
 function isUpcoming(exhibition, today = getToday()) {
+  if (isComingSoon(exhibition)) {
+    return true;
+  }
+
   const date = parseDate(exhibition);
 
   return !!date && date >= today;
@@ -110,13 +128,25 @@ function isPast(exhibition, today = getToday()) {
   return !!date && date < today;
 }
 
-// Frühestes Datum zuerst, bei gleichem Datum die kleinere Nummer
+// Frühestes Datum zuerst, bei gleichem Datum die kleinere Nummer.
+// „Coming soon“ steht immer hinter allen Ausstellungen mit Datum.
 function compareByDate(a, b) {
+  const soonA = isComingSoon(a);
+  const soonB = isComingSoon(b);
+
+  if (soonA || soonB) {
+    return Number(soonA) - Number(soonB);
+  }
+
   return (parseDate(a) - parseDate(b)) || (getNumber(a) - getNumber(b));
 }
 
 // "2026-12-24" → "24 December 2026"
 function formatDate(exhibition) {
+  if (isComingSoon(exhibition)) {
+    return "Coming soon";
+  }
+
   const date = parseDate(exhibition);
 
   return date
@@ -303,10 +333,13 @@ function mapExhibition(doc) {
     titel: doc.titel,
     theme: doc.theme || "",
     description: doc.description || "",
-    date: doc.date || null,
+    // „Coming soon“ hat kein Datum, auch wenn noch ein altes gespeichert ist
+    date: doc.release === "comingSoon" ? null : doc.date || null,
     time: doc.time || "",
     location: doc.location || "",
     locked: doc.locked,
+    visibility: doc.visibility || (doc.locked === false ? "public" : "locked"),
+    release: doc.release || "scheduled",
     video: doc.video || "",
     posters: (doc.posters || []).map((poster) => mapMedia(poster)).filter(Boolean),
     front_page: mapMedia(doc.frontPage),

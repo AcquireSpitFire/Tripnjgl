@@ -63,10 +63,13 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
   }
 
   const locked = exhibition.locked !== false
+  // "Gesperrt mit Link": Seite wird ausgeliefert, soll aber nirgends auftauchen
+  const linkOnly = exhibition.visibility === 'link'
   const canonical = base + '/exhibition/' + encodeURIComponent(exhibition.slug)
   const poster = asMedia(exhibition.posters?.[0])
   const frontPage = asMedia(exhibition.frontPage)
-  const ogImage = absolute(base, imageUrl(poster) || imageUrl(frontPage)) || common.ogImageDefault
+  const ogImage =
+    (!linkOnly && absolute(base, imageUrl(poster) || imageUrl(frontPage))) || common.ogImageDefault
   const description = summarize(
     exhibition.description ||
       [exhibition.theme, SITE_DESCRIPTION].filter(Boolean).join(' – '),
@@ -105,7 +108,7 @@ export async function GET(_request: Request, { params }: { params: Promise<{ slu
       description,
       canonical,
       ogImage,
-      robots: locked ? 'noindex, follow' : 'index, follow',
+      robots: linkOnly ? 'noindex, nofollow' : locked ? 'noindex, follow' : 'index, follow',
       jsonLd,
     }),
   )
